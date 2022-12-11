@@ -54,6 +54,9 @@ impl Lexer {
 
     /// Returns the next token in the input string.
     pub fn next_token<'a>(&mut self) -> Token<'a> {
+        // Skip whitespace characters.
+        self.skip_whitespace();
+
         let token = match self.ch {
             '=' => Token::new(TokenType::Assign, self.ch),
             '+' => Token::new(TokenType::Plus, self.ch),
@@ -65,11 +68,23 @@ impl Lexer {
             '}' => Token::new(TokenType::RBrace, self.ch),
             '\0' => Token::new(TokenType::Eof, "".to_string()),
 
+            // The nice thing about rust is that we can match only if the character satisfies
+            // some arbitrary constraint. In this case, we are matching if the character is
+            // a letter or an underscore.
             s if s.is_alphabetic() || s == '_' => {
-                todo!()
+                let ident = self.read_identifier();
+
+                Token::from_ident(ident)
             }
 
-            _ => todo!("Implement the rest of the lexer!"),
+            // Parse integers.
+            s if s.is_digit(10) => {
+                let number = self.read_number();
+
+                Token::new(TokenType::Int, number)
+            }
+
+            _ => Token::new(TokenType::Illegal, self.ch),
         };
 
         // Update the lexer's state to the next character in the input string.
@@ -102,5 +117,49 @@ impl Lexer {
         }
 
         self.ch
+    }
+
+    /// Skips whitespace characters from the input string. This is used when we encounter a
+    /// whitespace character, because that means we are lexing whitespace.
+    fn skip_whitespace(&mut self) {
+        while self.ch.is_whitespace() {
+            self.read_char();
+        }
+    }
+
+    /// Reads an identifier from the input string, and returns it as a `String`. This is used
+    /// when we encounter a character that is a letter or an underscore, because that means we
+    /// are lexing an identifier or keyword. It expects that `ch` is a letter or an underscore.
+    fn read_identifier(&mut self) -> String {
+        // Get the position of the first character in the identifier.
+        let position = self.current_position;
+
+        // Keep reading characters until we encounter a character that is not a letter, digit,
+        // or underscore.
+        while self.ch.is_alphanumeric() || self.ch == '_' {
+            self.read_char();
+        }
+
+        // Get the identifier from the input string.
+        self.input[position..self.current_position].iter().collect()
+    }
+
+    /// Reads a number from the input string, and returns it as a `String`. This is used when
+    /// we encounter a character that is a digit, because that means we are lexing a number.
+    /// It expects that `ch` is a digit.
+    fn read_number(&mut self) -> String {
+        // Get the position of the first character in the number.
+        let position = self.current_position;
+
+        // Keep reading characters until we encounter a character that is not a digit.
+        while self.ch.is_ascii_digit() {
+            self.read_char();
+        }
+
+        // Get the position of the last character in the number.
+        let end_position = self.current_position;
+
+        // Get the number from the input string.
+        self.input[position..end_position].iter().collect()
     }
 }

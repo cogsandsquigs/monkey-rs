@@ -28,6 +28,20 @@ impl Token<'_> {
             literal: Box::leak(literal.to_string().into_boxed_str()),
         }
     }
+
+    /// Creates a new `Token` from a given identifier `ident`. This is used when
+    /// lexing an identifier, as we don't know if it is a keyword or not until
+    /// we have lexed the entire identifier. Defaults to `TokenType::Ident`.
+    pub fn from_ident(ident: String) -> Self {
+        Self::new(
+            match ident.as_str() {
+                "fn" => TokenType::Function,
+                "let" => TokenType::Let,
+                _ => TokenType::Ident,
+            },
+            ident,
+        )
+    }
 }
 
 /// The token type that is used in the lexer. These are markers for the type of

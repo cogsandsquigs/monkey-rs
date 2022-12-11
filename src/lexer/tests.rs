@@ -59,6 +59,8 @@ fn next_token() {
     for (i, tt) in tests.iter().enumerate() {
         let token = lexer.next_token();
 
+        println!("tests[{}] - token: {:?}", i, token);
+
         assert_eq!(token.r#type, tt.r#type, "tests[{}] failed - type wrong.", i);
 
         assert_eq!(token, *tt, "tests[{}] failed - literal wrong.", i);
