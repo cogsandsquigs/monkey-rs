@@ -1,8 +1,12 @@
 [package]
-    edition = "2021"
-    name    = "monkey-rs"
-    version = "0.0.0"
-
-    # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+	authors     = ["Ian Pratt <ianjdpratt@gmail.com"]
+	description = "My implementation of the Monkey language in rust"
+	edition     = "2021"
+	license     = "MIT"
+	name        = "monkey-rs"
+	readme      = "README.md"
+	repository  = "github.com/cogsandsquigs/monkey-rs"
+	version     = "0.0.0"
+	# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]

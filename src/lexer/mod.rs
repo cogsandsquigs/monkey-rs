@@ -64,6 +64,11 @@ impl Lexer {
             '{' => Token::new(TokenType::LBrace, self.ch),
             '}' => Token::new(TokenType::RBrace, self.ch),
             '\0' => Token::new(TokenType::Eof, "".to_string()),
+
+            s if s.is_alphabetic() || s == '_' => {
+                todo!()
+            }
+
             _ => todo!("Implement the rest of the lexer!"),
         };
 
@@ -86,8 +91,8 @@ impl Lexer {
         if self.next_position >= self.input.len() {
             self.ch = '\0';
 
-            // We don't need to update `current_position` or `next_position` here, because
-            // we are at the end of the input string.
+        // We don't need to update `current_position` or `next_position` here, because
+        // we are at the end of the input string.
         } else {
             self.ch = self.input[self.next_position];
 
