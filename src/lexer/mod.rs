@@ -55,14 +55,14 @@ impl Lexer {
     /// Returns the next token in the input string.
     pub fn next_token<'a>(&mut self) -> Token<'a> {
         let token = match self.ch {
-            '=' => Token::new(TokenType::Assign, self.ch.to_string()),
-            '+' => Token::new(TokenType::Plus, self.ch.to_string()),
-            ',' => Token::new(TokenType::Comma, self.ch.to_string()),
-            ';' => Token::new(TokenType::Semicolon, self.ch.to_string()),
-            '(' => Token::new(TokenType::LParen, self.ch.to_string()),
-            ')' => Token::new(TokenType::RParen, self.ch.to_string()),
-            '{' => Token::new(TokenType::LBrace, self.ch.to_string()),
-            '}' => Token::new(TokenType::RBrace, self.ch.to_string()),
+            '=' => Token::new(TokenType::Assign, self.ch),
+            '+' => Token::new(TokenType::Plus, self.ch),
+            ',' => Token::new(TokenType::Comma, self.ch),
+            ';' => Token::new(TokenType::Semicolon, self.ch),
+            '(' => Token::new(TokenType::LParen, self.ch),
+            ')' => Token::new(TokenType::RParen, self.ch),
+            '{' => Token::new(TokenType::LBrace, self.ch),
+            '}' => Token::new(TokenType::RBrace, self.ch),
             '\0' => Token::new(TokenType::Eof, "".to_string()),
             _ => todo!("Implement the rest of the lexer!"),
         };

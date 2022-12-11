@@ -18,10 +18,14 @@ pub struct Token<'a> {
 /// Public API for the `Token` struct.
 impl Token<'_> {
     /// Creates a new `Token` from the given `TokenType` and literal value.
-    pub fn new(r#type: TokenType, literal: String) -> Self {
+    pub fn new<S: ToString>(r#type: TokenType, literal: S) -> Self {
         Self {
             r#type,
-            literal: Box::leak(literal.into_boxed_str()),
+
+            // Why do this? Because 1) we don't want to allocate a new `String` for
+            // every token, and 2) it makes it easier when defining a token, as defining
+            // a `&str` literal is easier than defining a `String` literal.
+            literal: Box::leak(literal.to_string().into_boxed_str()),
         }
     }
 }

@@ -5,45 +5,53 @@ use crate::token::{Token, TokenType};
 
 #[test]
 fn next_token() {
-    let input = "=+(){},;";
+    let input = "let five = 5;
+    let ten = 10;
+
+    let add = fn(x, y) {
+        x + y;
+    };
+
+    let result = add(five, ten);";
 
     let tests = vec![
-        Token {
-            r#type: TokenType::Assign,
-            literal: "=",
-        },
-        Token {
-            r#type: TokenType::Plus,
-            literal: "+",
-        },
-        Token {
-            r#type: TokenType::LParen,
-            literal: "(",
-        },
-        Token {
-            r#type: TokenType::RParen,
-            literal: ")",
-        },
-        Token {
-            r#type: TokenType::LBrace,
-            literal: "{",
-        },
-        Token {
-            r#type: TokenType::RBrace,
-            literal: "}",
-        },
-        Token {
-            r#type: TokenType::Comma,
-            literal: ",",
-        },
-        Token {
-            r#type: TokenType::Semicolon,
-            literal: ";",
-        },
-        Token {
-            r#type: TokenType::Eof,
-            literal: "",
-        },
+        Token::new(TokenType::Let, "let"),
+        Token::new(TokenType::Ident, "five"),
+        Token::new(TokenType::Assign, "="),
+        Token::new(TokenType::Int, "5"),
+        Token::new(TokenType::Semicolon, ";"),
+        Token::new(TokenType::Let, "let"),
+        Token::new(TokenType::Ident, "ten"),
+        Token::new(TokenType::Assign, "="),
+        Token::new(TokenType::Int, "10"),
+        Token::new(TokenType::Semicolon, ";"),
+        Token::new(TokenType::Let, "let"),
+        Token::new(TokenType::Ident, "add"),
+        Token::new(TokenType::Assign, "="),
+        Token::new(TokenType::Function, "fn"),
+        Token::new(TokenType::LParen, "("),
+        Token::new(TokenType::Ident, "x"),
+        Token::new(TokenType::Comma, ","),
+        Token::new(TokenType::Ident, "y"),
+        Token::new(TokenType::RParen, ")"),
+        Token::new(TokenType::LBrace, "{"),
+        Token::new(TokenType::Ident, "x"),
+        Token::new(TokenType::Plus, "+"),
+        Token::new(TokenType::Ident, "y"),
+        Token::new(TokenType::Semicolon, ";"),
+        Token::new(TokenType::RBrace, "}"),
+        Token::new(TokenType::Semicolon, ";"),
+        Token::new(TokenType::Let, "let"),
+        Token::new(TokenType::Ident, "result"),
+        Token::new(TokenType::Assign, "="),
+        Token::new(TokenType::Ident, "add"),
+        Token::new(TokenType::LParen, "("),
+        Token::new(TokenType::Ident, "five"),
+        Token::new(TokenType::Comma, ","),
+        Token::new(TokenType::Ident, "ten"),
+        Token::new(TokenType::RParen, ")"),
+        Token::new(TokenType::Semicolon, ";"),
+        Token::new(TokenType::Eof, ""),
     ];
 
     let mut lexer = Lexer::new(input);
