@@ -1,20 +1,37 @@
 use core::fmt::Display;
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
-struct Token<'a> {
+/// The token type that is used in the lexer. This contains both the type of the
+/// token (as `TokenType`), as well as the string literal value that the token was
+/// created from.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct Token<'a> {
     /// The token type that this token is.
-    r#type: TokenType,
+    pub r#type: TokenType,
 
     /// The literal value of the token. Using `&str` instead of `String` to avoid
     /// unnecessary allocations, as well to make significant that this is simply
     /// a slice of the input, and not a mutable copy of it. It doesn't need to be
     /// mutable, anyway.
-    literal: &'a str,
+    pub literal: &'a str,
 }
 
+/// Public API for the `Token` struct.
+impl Token<'_> {
+    /// Creates a new `Token` from the given `TokenType` and literal value.
+    pub fn new(r#type: TokenType, literal: String) -> Self {
+        Self {
+            r#type,
+            literal: Box::leak(literal.into_boxed_str()),
+        }
+    }
+}
+
+/// The token type that is used in the lexer. These are markers for the type of
+/// token that is being used. Note that they do not contain the actual value of
+/// the token, only the type.
 #[allow(dead_code)] // The token types here are not used yet
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-enum TokenType {
+pub enum TokenType {
     Illegal,
     Eof,
 

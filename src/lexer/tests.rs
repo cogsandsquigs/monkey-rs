@@ -1,10 +1,13 @@
-#![cfg(tests)]
+#![cfg(test)]
+
+use super::Lexer;
+use crate::token::{Token, TokenType};
 
 #[test]
 fn next_token() {
-    let input = "=+(){{}},;";
+    let input = "=+(){},;";
 
-    let expected = vec![
+    let tests = vec![
         Token {
             r#type: TokenType::Assign,
             literal: "=",
@@ -23,11 +26,11 @@ fn next_token() {
         },
         Token {
             r#type: TokenType::LBrace,
-            literal: "{{",
+            literal: "{",
         },
         Token {
             r#type: TokenType::RBrace,
-            literal: "}}",
+            literal: "}",
         },
         Token {
             r#type: TokenType::Comma,
@@ -43,7 +46,13 @@ fn next_token() {
         },
     ];
 
-    let lexer = Lexer::new(input);
+    let mut lexer = Lexer::new(input);
 
-    for (i, tt) in expected.iter().enumerate() {}
+    for (i, tt) in tests.iter().enumerate() {
+        let token = lexer.next_token();
+
+        assert_eq!(token.r#type, tt.r#type, "tests[{}] failed - type wrong.", i);
+
+        assert_eq!(token, *tt, "tests[{}] failed - literal wrong.", i);
+    }
 }
