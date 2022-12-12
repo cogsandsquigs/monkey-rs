@@ -57,11 +57,15 @@ impl Lexer {
         // Skip whitespace characters.
         self.skip_whitespace();
 
-        println!("{}", self.ch);
-
         let token = match self.ch {
             '=' => Token::new(TokenType::Assign, self.ch),
             '+' => Token::new(TokenType::Plus, self.ch),
+            '-' => Token::new(TokenType::Minus, self.ch),
+            '!' => Token::new(TokenType::Bang, self.ch),
+            '*' => Token::new(TokenType::Star, self.ch),
+            '/' => Token::new(TokenType::Slash, self.ch),
+            '<' => Token::new(TokenType::Lt, self.ch),
+            '>' => Token::new(TokenType::Gt, self.ch),
             ',' => Token::new(TokenType::Comma, self.ch),
             ';' => Token::new(TokenType::Semicolon, self.ch),
             '(' => Token::new(TokenType::LParen, self.ch),

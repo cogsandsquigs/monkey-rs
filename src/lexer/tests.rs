@@ -6,13 +6,21 @@ use crate::token::{Token, TokenType};
 #[test]
 fn next_token() {
     let input = "let five = 5;
-	let ten = 10;
+    let ten = 10;
 
-	let add = fn(x, y) {
-		x + y;
-	};
+    let add = fn(x, y) {
+        x + y;
+    };
 
-	let result = add(five, ten);";
+    let result = add(five, ten);
+    !-/*5;
+    5 < 10 > 5;
+    
+    if (5 < 10) {
+        return true;
+    } else {
+        return false;
+    }";
 
     let tests = vec![
         Token::new(TokenType::Let, "let"),
@@ -51,6 +59,35 @@ fn next_token() {
         Token::new(TokenType::Ident, "ten"),
         Token::new(TokenType::RParen, ")"),
         Token::new(TokenType::Semicolon, ";"),
+        Token::new(TokenType::Bang, "!"),
+        Token::new(TokenType::Minus, "-"),
+        Token::new(TokenType::Slash, "/"),
+        Token::new(TokenType::Star, "*"),
+        Token::new(TokenType::Int, "5"),
+        Token::new(TokenType::Semicolon, ";"),
+        Token::new(TokenType::Int, "5"),
+        Token::new(TokenType::Lt, "<"),
+        Token::new(TokenType::Int, "10"),
+        Token::new(TokenType::Gt, ">"),
+        Token::new(TokenType::Int, "5"),
+        Token::new(TokenType::Semicolon, ";"),
+        Token::new(TokenType::If, "if"),
+        Token::new(TokenType::LParen, "("),
+        Token::new(TokenType::Int, "5"),
+        Token::new(TokenType::Lt, "<"),
+        Token::new(TokenType::Int, "10"),
+        Token::new(TokenType::RParen, ")"),
+        Token::new(TokenType::LBrace, "{"),
+        Token::new(TokenType::Return, "return"),
+        Token::new(TokenType::True, "true"),
+        Token::new(TokenType::Semicolon, ";"),
+        Token::new(TokenType::RBrace, "}"),
+        Token::new(TokenType::Else, "else"),
+        Token::new(TokenType::LBrace, "{"),
+        Token::new(TokenType::Return, "return"),
+        Token::new(TokenType::False, "false"),
+        Token::new(TokenType::Semicolon, ";"),
+        Token::new(TokenType::RBrace, "}"),
         Token::new(TokenType::Eof, ""),
     ];
 
@@ -58,8 +95,6 @@ fn next_token() {
 
     for (i, tt) in tests.iter().enumerate() {
         let token = lexer.next_token();
-
-        println!("tests[{}] - token: {:?}", i, token);
 
         assert_eq!(token.r#type, tt.r#type, "tests[{}] failed - type wrong.", i);
 

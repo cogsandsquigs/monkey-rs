@@ -37,6 +37,11 @@ impl Token<'_> {
             match ident.as_str() {
                 "fn" => TokenType::Function,
                 "let" => TokenType::Let,
+                "if" => TokenType::If,
+                "else" => TokenType::Else,
+                "true" => TokenType::True,
+                "false" => TokenType::False,
+                "return" => TokenType::Return,
                 _ => TokenType::Ident,
             },
             ident,
@@ -60,6 +65,15 @@ pub enum TokenType {
     // Operators
     Assign,
     Plus,
+    Minus,
+    Bang,
+    // In the original implementation, this is called `Asterisk`. However, I
+    // thought that `Star` is a better name.
+    Star,
+    Slash,
+
+    Lt,
+    Gt,
 
     // Delimiters
     Comma,
@@ -73,6 +87,11 @@ pub enum TokenType {
     // Keywords
     Function,
     Let,
+    If,
+    Else,
+    Return,
+    True,
+    False,
 }
 
 impl Display for TokenType {
@@ -84,6 +103,12 @@ impl Display for TokenType {
             TokenType::Int => write!(f, "INT"),
             TokenType::Assign => write!(f, "="),
             TokenType::Plus => write!(f, "+"),
+            TokenType::Minus => write!(f, "-"),
+            TokenType::Bang => write!(f, "!"),
+            TokenType::Star => write!(f, "*"),
+            TokenType::Slash => write!(f, "/"),
+            TokenType::Lt => write!(f, "<"),
+            TokenType::Gt => write!(f, ">"),
             TokenType::Comma => write!(f, ","),
             TokenType::Semicolon => write!(f, ";"),
             TokenType::LParen => write!(f, "("),
@@ -92,6 +117,11 @@ impl Display for TokenType {
             TokenType::RBrace => write!(f, "}}"),
             TokenType::Function => write!(f, "FUNCTION"),
             TokenType::Let => write!(f, "LET"),
+            TokenType::If => write!(f, "IF"),
+            TokenType::Else => write!(f, "ELSE"),
+            TokenType::Return => write!(f, "RETURN"),
+            TokenType::True => write!(f, "TRUE"),
+            TokenType::False => write!(f, "FALSE"),
         }
     }
 }
