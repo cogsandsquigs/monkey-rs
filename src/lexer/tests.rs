@@ -20,7 +20,11 @@ fn next_token() {
         return true;
     } else {
         return false;
-    }";
+    }
+    
+    10 == 10;
+    10 != 9;
+    ";
 
     let tests = vec![
         Token::new(TokenType::Let, "let"),
@@ -88,6 +92,14 @@ fn next_token() {
         Token::new(TokenType::False, "false"),
         Token::new(TokenType::Semicolon, ";"),
         Token::new(TokenType::RBrace, "}"),
+        Token::new(TokenType::Int, "10"),
+        Token::new(TokenType::Eq, "=="),
+        Token::new(TokenType::Int, "10"),
+        Token::new(TokenType::Semicolon, ";"),
+        Token::new(TokenType::Int, "10"),
+        Token::new(TokenType::NotEq, "!="),
+        Token::new(TokenType::Int, "9"),
+        Token::new(TokenType::Semicolon, ";"),
         Token::new(TokenType::Eof, ""),
     ];
 

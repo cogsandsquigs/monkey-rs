@@ -53,15 +53,15 @@ impl Lexer {
     }
 
     /// Returns the next token in the input string.
-    pub fn next_token<'a>(&mut self) -> Token<'a> {
+    pub fn next_token(&mut self) -> Token {
         // Skip whitespace characters.
         self.skip_whitespace();
 
         let token = match self.ch {
-            '=' => Token::new(TokenType::Assign, self.ch),
+            '=' => self.make_two_char_token('=', TokenType::Assign, TokenType::Eq),
             '+' => Token::new(TokenType::Plus, self.ch),
             '-' => Token::new(TokenType::Minus, self.ch),
-            '!' => Token::new(TokenType::Bang, self.ch),
+            '!' => self.make_two_char_token('=', TokenType::Bang, TokenType::NotEq),
             '*' => Token::new(TokenType::Star, self.ch),
             '/' => Token::new(TokenType::Slash, self.ch),
             '<' => Token::new(TokenType::Lt, self.ch),
@@ -120,6 +120,20 @@ impl Lexer {
         self.ch
     }
 
+    /// Peeks at the next character in the input string, and returns it. This is used when we
+    /// encounter a character that could be the start of a two-character token, such as `==`.
+    /// This function does not update the lexer's state, so that the next call to `next_token`
+    /// will return the same token. Note that if we are at the end of the input string, this
+    /// function will return `\0`.
+    fn peek_char(&self) -> char {
+        // Bounds checking.
+        if self.next_position >= self.input.len() {
+            '\0'
+        } else {
+            self.input[self.next_position]
+        }
+    }
+
     /// Skips whitespace characters from the input string. This is used when we encounter a
     /// whitespace character, because that means we are lexing whitespace.
     fn skip_whitespace(&mut self) {
@@ -160,5 +174,32 @@ impl Lexer {
 
         // Get the number from the input string.
         self.input[position..self.current_position].iter().collect()
+    }
+
+    /// Abstraction for creating a new `Token` based on a two-character token. This is used
+    /// when we encounter a character that could be the start of a two-character token, such
+    /// as `==`. It expects that `ch` is the first character in the two-character token.
+    fn make_two_char_token(
+        &mut self,
+        next_char: char,
+        single_char_type: TokenType,
+        double_char_type: TokenType,
+    ) -> Token {
+        // Get the position of the first character in the two-character token.
+        let position = self.current_position;
+
+        Token::new(
+            if self.peek_char() == next_char {
+                // Update the lexer's state to the next character in the input string.
+                self.read_char();
+
+                double_char_type
+            } else {
+                single_char_type
+            },
+            self.input[position..self.current_position + 1]
+                .iter()
+                .collect::<String>(),
+        )
     }
 }
