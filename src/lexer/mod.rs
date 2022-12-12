@@ -57,6 +57,8 @@ impl Lexer {
         // Skip whitespace characters.
         self.skip_whitespace();
 
+        println!("{}", self.ch);
+
         let token = match self.ch {
             '=' => Token::new(TokenType::Assign, self.ch),
             '+' => Token::new(TokenType::Plus, self.ch),
@@ -70,19 +72,14 @@ impl Lexer {
 
             // The nice thing about rust is that we can match only if the character satisfies
             // some arbitrary constraint. In this case, we are matching if the character is
-            // a letter or an underscore.
-            s if s.is_alphabetic() || s == '_' => {
-                let ident = self.read_identifier();
+            // a letter or an underscore. Returning here because we don't need to call `read_char`
+            // again, as we already did that in the `read_identifier` function, at the end of the
+            // loop.
+            s if s.is_alphabetic() || s == '_' => return Token::from_ident(self.read_identifier()),
 
-                Token::from_ident(ident)
-            }
-
-            // Parse integers.
-            s if s.is_digit(10) => {
-                let number = self.read_number();
-
-                Token::new(TokenType::Int, number)
-            }
+            // Parse integers. Returning here because we don't need to call `read_char` again, as we
+            // already did that in the `read_number` function, at the end of the loop.
+            s if s.is_ascii_digit() => return Token::new(TokenType::Int, self.read_number()),
 
             _ => Token::new(TokenType::Illegal, self.ch),
         };
@@ -146,7 +143,8 @@ impl Lexer {
 
     /// Reads a number from the input string, and returns it as a `String`. This is used when
     /// we encounter a character that is a digit, because that means we are lexing a number.
-    /// It expects that `ch` is a digit.
+    /// It expects that `ch` is a digit. Note that if you use this function, you cannot call
+    /// `read_char` again, because this function already does that at the end of the loop.
     fn read_number(&mut self) -> String {
         // Get the position of the first character in the number.
         let position = self.current_position;
@@ -156,10 +154,7 @@ impl Lexer {
             self.read_char();
         }
 
-        // Get the position of the last character in the number.
-        let end_position = self.current_position;
-
         // Get the number from the input string.
-        self.input[position..end_position].iter().collect()
+        self.input[position..self.current_position].iter().collect()
     }
 }
