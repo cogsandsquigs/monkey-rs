@@ -16,7 +16,10 @@ pub struct Lexer {
 
     /// The position of the next character we are lexing in the input string. Note that in the
     /// original Monkey implementation, this field is called `read_position`, but I renamed it
-    /// to `next_position` to make it more clear what this is used for.
+    /// to `next_position` to make it more clear what this is used for. Also, while you could
+    /// remove this field and just use `current_position + 1`, I decided to keep it because it
+    /// 1) allows for us to "prime" the lexer without having complicated code, and 2) makes
+    /// it easier to understand what is going on.
     next_position: usize,
 
     /// The current character we are lexing in the input string. This is used as a "storage
@@ -113,6 +116,9 @@ impl Lexer {
             self.ch = self.input[self.next_position];
 
             // Update `current_position` and `next_position` to point to the next character.
+            // This way of doing things (instead of using `self.current_position += 1`) is better
+            // because we can "prime" the lexer by calling `read_char` once, and then we don't
+            // need to use complicated code to detect if we are at the beginning of the input.
             self.current_position = self.next_position;
             self.next_position += 1;
         }

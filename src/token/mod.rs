@@ -52,7 +52,6 @@ impl Token {
 /// The token type that is used in the lexer. These are markers for the type of
 /// token that is being used. Note that they do not contain the actual value of
 /// the token, only the type.
-#[allow(dead_code)] // The token types here are not used yet
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum TokenType {
     Illegal,

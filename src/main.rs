@@ -1,5 +1,6 @@
+pub mod ast;
 pub mod lexer;
-mod repl;
+pub mod repl;
 pub mod token;
 
 use std::io::Result;
