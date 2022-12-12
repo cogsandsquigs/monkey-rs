@@ -100,7 +100,7 @@ fn next_token() {
         Token::new(TokenType::NotEq, "!="),
         Token::new(TokenType::Int, "9"),
         Token::new(TokenType::Semicolon, ";"),
-        Token::new(TokenType::Eof, ""),
+        Token::new(TokenType::EOF, ""),
     ];
 
     let mut lexer = Lexer::new(input);

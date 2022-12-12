@@ -56,7 +56,7 @@ impl Token {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum TokenType {
     Illegal,
-    Eof,
+    EOF,
 
     // Identifiers + literals
     Ident,
@@ -104,7 +104,7 @@ impl Display for TokenType {
             "{}",
             match self {
                 TokenType::Illegal => "ILLEGAL",
-                TokenType::Eof => "EOF",
+                TokenType::EOF => "EOF",
                 TokenType::Ident => "IDENT",
                 TokenType::Int => "INT",
                 TokenType::Assign => "=",

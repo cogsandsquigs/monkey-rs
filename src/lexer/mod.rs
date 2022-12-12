@@ -72,7 +72,7 @@ impl Lexer {
             ')' => Token::new(TokenType::RParen, self.ch),
             '{' => Token::new(TokenType::LBrace, self.ch),
             '}' => Token::new(TokenType::RBrace, self.ch),
-            '\0' => Token::new(TokenType::Eof, "".to_string()),
+            '\0' => Token::new(TokenType::EOF, "".to_string()),
 
             // The nice thing about rust is that we can match only if the character satisfies
             // some arbitrary constraint. In this case, we are matching if the character is
@@ -188,6 +188,9 @@ impl Lexer {
         // Get the position of the first character in the two-character token.
         let position = self.current_position;
 
+        // Create a new `Token` based on the next character in the input string. Wrapping
+        // the if-statement in `Token::new` makes the code more succinct, and also reduces
+        // repetition.
         Token::new(
             if self.peek_char() == next_char {
                 // Update the lexer's state to the next character in the input string.
