@@ -10,7 +10,6 @@ fn main() -> Result<()> {
         "Hello, {}! This is the Monkey programming language!",
         username()
     );
-
     println!("Feel free to type in commands");
 
     repl::start(std::io::stdin(), std::io::stdout())?;
