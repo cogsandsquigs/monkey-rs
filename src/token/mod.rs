@@ -3,7 +3,7 @@ use core::fmt::Display;
 /// The token type that is used in the lexer. This contains both the type of the
 /// token (as `TokenType`), as well as the string literal value that the token was
 /// created from.
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Clone, Debug, Default, PartialEq, Eq, Hash)]
 pub struct Token {
     /// The token type that this token is.
     pub r#type: TokenType,
@@ -52,9 +52,10 @@ impl Token {
 /// The token type that is used in the lexer. These are markers for the type of
 /// token that is being used. Note that they do not contain the actual value of
 /// the token, only the type.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Clone, Debug, Default, Copy, PartialEq, Eq, Hash)]
 pub enum TokenType {
     Illegal,
+    #[default]
     EOF,
 
     // Identifiers + literals
