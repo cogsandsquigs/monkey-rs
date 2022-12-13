@@ -1,49 +1,46 @@
-// TODO: Remove `token` fields from structs, as they can be made redundant because we know what token made
-// the statement.
-
-use super::{expression::Expression, Node};
+use super::{
+    expression::{Expression, Identifier},
+    Node,
+};
 use crate::token::Token;
-use std::rc::Rc;
 
-/// The `Statement` trait is implemented by all AST statement nodes. Note that the `statement_node`
-/// method is not implemented here, as it is only used as guidance for the Go compiler in the original
-/// implementation. Given that in Rust, we explicitly implement traits for types, this is not needed.
-pub trait Statement: Node {}
+/// The `Statement` enum represents a statement in the Monkey language. Note that while in the original
+/// implementation, the `Statement` trait was implemented by the `LetStatement` struct, I have chosen to
+/// implement the `Statement` trait via the `Statement` enum, as it allows us to store different types of
+/// statements in the same vector without having to use `Box` or `Rc` pointers and jumping through hoops.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum Statement {
+    /// The `LetStatement` struct represents a `let` statement in the Monkey language. It contains a
+    /// `token` field, which is the `let` token, a `name` field, which is the identifier that is being
+    /// assigned to, and a `value` field, which is the expression that is being assigned to the identifier.
+    LetStatement(LetStatement),
+}
 
-/// Denotes a `let` statement. It contains the name of the variable that is being assigned to, and the
-/// expression that is being assigned to it.
-#[derive(Debug, Clone)]
+impl Node for Statement {
+    fn token_literal(&self) -> String {
+        match self {
+            Self::LetStatement(let_statement) => let_statement.token_literal(),
+        }
+    }
+}
+
+/// The `LetStatement` struct represents a `let` statement in the Monkey language. It contains a
+/// `token` field, which is the `let` token, a `name` field, which is the identifier that is being
+/// assigned to, and a `value` field, which is the expression that is being assigned to the identifier.
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct LetStatement {
-    /// The token that represents the `let` keyword.
+    /// The `token` field is the `let` token.
     token: Token,
-    /// The name of the variable that is being assigned to.
+
+    /// The `name` field is the identifier that is being assigned to.
     name: Identifier,
-    /// The expression that is being assigned to the variable.
-    value: Rc<dyn Expression>,
+
+    /// The `value` field is the expression that is being assigned to the identifier.
+    value: Box<Expression>,
 }
 
 impl Node for LetStatement {
-    /// Returns the literal value of the token that the node represents. This is used for debugging.
     fn token_literal(&self) -> String {
         self.token.literal.clone()
     }
 }
-
-impl Statement for LetStatement {}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Identifier {
-    /// The token that represents the identifier.
-    token: Token,
-    /// The value of the identifier.
-    value: String,
-}
-
-impl Node for Identifier {
-    /// Returns the literal value of the token that the node represents. This is used for debugging.
-    fn token_literal(&self) -> String {
-        self.token.literal.clone()
-    }
-}
-
-impl Expression for Identifier {}
