@@ -120,7 +120,6 @@ impl Parser {
 
     /// The `expect_peek` method checks if the peek token is of a given type, and if it is, it advances
     /// the parser by one token and returns true. If it is not, it returns false.
-
     fn expect_peek(&mut self, r#type: TokenType) -> bool {
         if self.peek_token_is(r#type) {
             self.next_token();
