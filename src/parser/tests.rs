@@ -16,7 +16,8 @@ let foobar = 838383;
     let lexer = Lexer::new(input);
     let mut parser = Parser::new(lexer);
 
-    let program = parser.parse_program();
+    let program = parser.parse_program().unwrap();
+
     assert_eq!(program.statements.len(), 3);
 
     let tests = vec![("x", 5), ("y", 10), ("foobar", 838383)];

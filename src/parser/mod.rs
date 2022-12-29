@@ -40,7 +40,9 @@ impl Parser {
     }
 
     /// Parses the input from the `Lexer` into an AST.
-    pub fn parse_program(&mut self) -> Program {
+    /// TODO: This should return an actual error, not just `()`.
+    #[allow(clippy::result_unit_err)]
+    pub fn parse_program(&mut self) -> Result<Program, ()> {
         let mut program = Program { statements: vec![] };
 
         while self.current_token.r#type != TokenType::EOF {
@@ -53,7 +55,7 @@ impl Parser {
             self.next_token();
         }
 
-        program
+        Ok(program)
     }
 }
 
