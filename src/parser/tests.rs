@@ -19,7 +19,12 @@ let foobar = 838383;
     let program = parser.parse_program().unwrap();
     check_parser_errors(&parser);
 
-    assert_eq!(program.statements.len(), 3);
+    assert_eq!(
+        program.statements.len(),
+        3,
+        "Expected 3 statements, but got {} statements",
+        program.statements.len()
+    );
 
     let tests = vec![("x", 5), ("y", 10), ("foobar", 838383)];
 
@@ -39,6 +44,39 @@ fn test_let_statement(stmt: &Statement, name: &str) {
             "Statement is not a Let statement, got {}",
             stmt.token_literal()
         );
+    }
+}
+
+#[test]
+fn test_return_statements() {
+    let input = r#"
+return 5;
+return 10;
+return 993322;
+"#;
+
+    let lexer = Lexer::new(input);
+    let mut parser = Parser::new(lexer);
+
+    let program = parser.parse_program().unwrap();
+    check_parser_errors(&parser);
+
+    assert_eq!(
+        program.statements.len(),
+        3,
+        "Expected 3 statements, but got {} statements",
+        program.statements.len()
+    );
+
+    for stmt in program.statements {
+        let Statement::Return(return_stmt) = stmt else {
+            panic!(
+                "Statement is not a Return statement, got {}",
+                stmt.token_literal()
+            );
+        };
+
+        assert_eq!(return_stmt.token_literal(), "return");
     }
 }
 

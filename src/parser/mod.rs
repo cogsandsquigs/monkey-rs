@@ -148,7 +148,7 @@ impl Parser {
     /// field.
     fn peek_error(&mut self, tt: TokenType) {
         let error = Error::new(format!(
-            "expected next token to be {}, found {} instead",
+            "expected next token to be {}, got {} instead",
             tt, self.peek_token.r#type
         ));
 
