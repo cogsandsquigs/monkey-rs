@@ -56,9 +56,9 @@ pub struct Return {
     /// The `token` field is the `return` token.
     pub token: Token,
 
-    /// The `return_value` field is the expression that is being returned.
+    /// The `value` field is the expression that is being returned.
     /// TODO: Get rid of the `Option` here, only necessary b/c we aren't parsing expressions yet.
-    pub return_value: Option<Box<Expression>>,
+    pub value: Option<Box<Expression>>,
 }
 
 impl Node for Return {

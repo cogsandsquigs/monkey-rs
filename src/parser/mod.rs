@@ -4,7 +4,7 @@ mod tests;
 use crate::{
     ast::{
         expression::Identifier,
-        statement::{Let, Statement},
+        statement::{Let, Return, Statement},
         Program,
     },
     lexer::Lexer,
@@ -86,6 +86,7 @@ impl Parser {
     fn parse_statement(&mut self) -> Result<Statement, ()> {
         match self.current_token.r#type {
             TokenType::Let => Ok(Statement::Let(self.parse_let_statement()?)),
+            TokenType::Return => Ok(Statement::Return(self.parse_return_statement()?)),
             _ => Err(()),
         }
     }
@@ -120,6 +121,22 @@ impl Parser {
             name,
             value: None,
         })
+    }
+
+    /// The `parse_return_statement` method parses a `return` statement from the input. Expects the
+    /// current token to be a `TokenType::Return`.
+    fn parse_return_statement(&mut self) -> Result<Return, ()> {
+        let token = self.current_token.clone();
+
+        self.next_token();
+
+        // TODO: We're skipping the expressions until we
+        // encounter a semicolon
+        while !self.cur_token_is(TokenType::Semicolon) {
+            self.next_token()
+        }
+
+        Ok(Return { token, value: None })
     }
 
     /// The `cur_token_is` method checks if the current token is of a given type.
