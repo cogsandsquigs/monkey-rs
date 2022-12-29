@@ -1,13 +1,19 @@
 pub mod errors;
+mod expressions;
+mod precedence;
 mod statements;
 mod tests;
 
-use self::errors::Error;
+use self::{
+    errors::Error,
+    expressions::{InfixParseFn, PrefixParseFn},
+};
 use crate::{
     ast::Program,
     lexer::Lexer,
     token::{Token, TokenType},
 };
+use std::collections::HashMap;
 
 /// The parser for the Monkey programming language. It takes a `Lexer` and parses it into an AST.
 pub struct Parser {
@@ -22,6 +28,14 @@ pub struct Parser {
 
     /// The `peek_token` field is the next token that the parser is looking at.
     peek_token: Token,
+
+    /// The `prefix_parse_fns` field is a map of token types to prefix parse functions. This is used
+    /// to determine how to parse a given token for a prefix expression.
+    prefix_parse_fns: HashMap<TokenType, PrefixParseFn>,
+
+    /// The `infix_parse_fns` field is a map of token types to infix parse functions. This is used to
+    /// determine how to parse a given token for an infix expression.
+    infix_parse_fns: HashMap<TokenType, InfixParseFn>,
 }
 
 /// Public API for the `Parser` struct.
@@ -31,11 +45,17 @@ impl Parser {
     pub fn new(lexer: Lexer) -> Self {
         let mut parser = Self {
             lexer,
+
             errors: vec![],
+
             current_token: Token::default(),
             peek_token: Token::default(),
+
+            prefix_parse_fns: HashMap::new(),
+            infix_parse_fns: HashMap::new(),
         };
 
+        // Prime the parser by calling `next_token` twice.
         parser.next_token();
         parser.next_token();
 
@@ -48,9 +68,7 @@ impl Parser {
     }
 
     /// Parses the input from the `Lexer` into an AST.
-    /// TODO: This should return an actual error, not just `()`.
-    #[allow(clippy::result_unit_err)]
-    pub fn parse_program(&mut self) -> Result<Program, ()> {
+    pub fn parse_program(&mut self) -> Result<Program, &[Error]> {
         let mut program = Program { statements: vec![] };
 
         while self.current_token.r#type != TokenType::EOF {
@@ -63,7 +81,11 @@ impl Parser {
             self.next_token();
         }
 
-        Ok(program)
+        if self.errors.is_empty() {
+            Ok(program)
+        } else {
+            Err(&self.errors)
+        }
     }
 }
 

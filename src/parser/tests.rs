@@ -1,9 +1,27 @@
 #![cfg(test)]
 
+use crate::ast::expression::Expression;
 use crate::ast::statement::Statement;
 use crate::ast::Node;
 use crate::lexer::Lexer;
 use crate::parser::Parser;
+
+/// Helper function to check for any errors in the parser.
+fn check_parser_errors(parser: &Parser) {
+    let errors = parser.errors();
+
+    if errors.is_empty() {
+        return;
+    }
+
+    println!("parser has {} errors", errors.len());
+
+    for error in errors {
+        println!("parser error: {}", error);
+    }
+
+    panic!("parser has errors");
+}
 
 #[test]
 fn test_let_statements() {
@@ -80,19 +98,39 @@ return 993322;
     }
 }
 
-/// Helper function to check for any errors in the parser.
-fn check_parser_errors(parser: &Parser) {
-    let errors = parser.errors();
+/// Tests that identifiers are parsed correctly by the expression parser.
+#[test]
+fn test_identifier_expression() {
+    let input = "foobar;";
 
-    if errors.is_empty() {
-        return;
-    }
+    let lexer = Lexer::new(input);
+    let mut parser = Parser::new(lexer);
 
-    println!("parser has {} errors", errors.len());
+    let program = parser.parse_program().unwrap();
+    check_parser_errors(&parser);
 
-    for error in errors {
-        println!("parser error: {}", error);
-    }
+    assert_eq!(
+        program.statements.len(),
+        1,
+        "Expected 1 statement, but got {} statements",
+        program.statements.len()
+    );
 
-    panic!("parser has errors");
+    let Statement::ExpressionStatement(stmt) = &program.statements[0] else {
+        panic!(
+            "Statement is not an ExpressionStatement statement, got {}",
+            program.statements[0].token_literal()
+        );
+    };
+
+    let Expression::Identifier(ident) = &stmt.expression else {
+        panic!(
+            "Expression is not an Identifier expression, got {}",
+            stmt.expression.token_literal()
+        );
+    };
+
+    assert_eq!(ident.value, "foobar");
+
+    assert_eq!(ident.token_literal(), "foobar");
 }

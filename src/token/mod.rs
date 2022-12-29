@@ -38,7 +38,7 @@ impl Token {
                 "else" => TokenType::Else,
                 "true" => TokenType::True,
                 "false" => TokenType::False,
-                "return" => TokenType::ReturnStatement,
+                "return" => TokenType::Return,
                 _ => TokenType::Ident,
             },
             ident,
@@ -89,7 +89,7 @@ pub enum TokenType {
     Let,
     If,
     Else,
-    ReturnStatement,
+    Return,
     True,
     False,
 }
@@ -124,7 +124,7 @@ impl Display for TokenType {
                 TokenType::Let => "LET",
                 TokenType::If => "IF",
                 TokenType::Else => "ELSE",
-                TokenType::ReturnStatement => "RETURN",
+                TokenType::Return => "RETURN",
                 TokenType::True => "TRUE",
                 TokenType::False => "FALSE",
             }

@@ -1,8 +1,8 @@
-use super::Parser;
+use super::{precedence::Precedence, Parser};
 use crate::{
     ast::{
         expression::Identifier,
-        statement::{LetStatement, ReturnStatement, Statement},
+        statement::{ExpressionStatement, LetStatement, ReturnStatement, Statement},
     },
     token::TokenType,
 };
@@ -13,10 +13,10 @@ impl Parser {
     pub(crate) fn parse_statement(&mut self) -> Result<Statement, ()> {
         match self.current_token.r#type {
             TokenType::Let => Ok(Statement::LetStatement(self.parse_let_statement()?)),
-            TokenType::ReturnStatement => {
-                Ok(Statement::ReturnStatement(self.parse_return_statement()?))
-            }
-            _ => Err(()),
+            TokenType::Return => Ok(Statement::ReturnStatement(self.parse_return_statement()?)),
+            _ => Ok(Statement::ExpressionStatement(
+                self.parse_expression_statement()?,
+            )),
         }
     }
 
@@ -53,7 +53,7 @@ impl Parser {
     }
 
     /// The `parse_return_statement` method parses a `return` statement from the input. Expects the
-    /// current token to be a `TokenType::ReturnStatement`.
+    /// current token to be a `TokenType::Return`.
     fn parse_return_statement(&mut self) -> Result<ReturnStatement, ()> {
         let token = self.current_token.clone();
 
@@ -66,5 +66,17 @@ impl Parser {
         }
 
         Ok(ReturnStatement { token, value: None })
+    }
+
+    fn parse_expression_statement(&mut self) -> Result<ExpressionStatement, ()> {
+        let token = self.current_token.clone();
+        let expression = self.parse_expression(Precedence::Lowest)?;
+
+        // Parse the ending semicolon (if it exists).
+        if self.peek_token_is(TokenType::Semicolon) {
+            self.next_token();
+        }
+
+        Ok(ExpressionStatement { token, expression })
     }
 }
