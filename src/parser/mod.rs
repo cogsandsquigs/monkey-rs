@@ -4,7 +4,7 @@ mod tests;
 use crate::{
     ast::{
         expression::Identifier,
-        statement::{Let, Return, Statement},
+        statement::{LetStatement, ReturnStatement, Statement},
         Program,
     },
     lexer::Lexer,
@@ -85,20 +85,22 @@ impl Parser {
     /// TODO: This should return an actual error, not just `()`.
     fn parse_statement(&mut self) -> Result<Statement, ()> {
         match self.current_token.r#type {
-            TokenType::Let => Ok(Statement::Let(self.parse_let_statement()?)),
-            TokenType::Return => Ok(Statement::Return(self.parse_return_statement()?)),
+            TokenType::LetStatement => Ok(Statement::LetStatement(self.parse_let_statement()?)),
+            TokenType::ReturnStatement => {
+                Ok(Statement::ReturnStatement(self.parse_return_statement()?))
+            }
             _ => Err(()),
         }
     }
 
     /// The `parse_let_statement` method parses a `let` statement from the input. Expects the current
-    /// token to be a `TokenType::Let`.
+    /// token to be a `TokenType::LetStatement`.
     /// TODO: This should return an actual error, not just `()`.
-    fn parse_let_statement(&mut self) -> Result<Let, ()> {
+    fn parse_let_statement(&mut self) -> Result<LetStatement, ()> {
         let token = self.current_token.clone();
 
         if !self.expect_peek(TokenType::Ident) {
-            return Err(()); // TODO: Return an actual error.
+            return Err(()); // TODO: ReturnStatement an actual error.
         }
 
         let name = Identifier {
@@ -108,7 +110,7 @@ impl Parser {
 
         // Need to check for `TokenType::Assign` here.
         if !self.expect_peek(TokenType::Assign) {
-            return Err(()); // TODO: Return an actual error.
+            return Err(()); // TODO: ReturnStatement an actual error.
         }
 
         // TODO: We're skipping expressions until we get to the semicolon.
@@ -116,7 +118,7 @@ impl Parser {
             self.next_token();
         }
 
-        Ok(Let {
+        Ok(LetStatement {
             token,
             name,
             value: None,
@@ -124,8 +126,8 @@ impl Parser {
     }
 
     /// The `parse_return_statement` method parses a `return` statement from the input. Expects the
-    /// current token to be a `TokenType::Return`.
-    fn parse_return_statement(&mut self) -> Result<Return, ()> {
+    /// current token to be a `TokenType::ReturnStatement`.
+    fn parse_return_statement(&mut self) -> Result<ReturnStatement, ()> {
         let token = self.current_token.clone();
 
         self.next_token();
@@ -136,7 +138,7 @@ impl Parser {
             self.next_token()
         }
 
-        Ok(Return { token, value: None })
+        Ok(ReturnStatement { token, value: None })
     }
 
     /// The `cur_token_is` method checks if the current token is of a given type.

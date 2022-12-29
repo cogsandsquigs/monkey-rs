@@ -5,32 +5,32 @@ use super::{
 use crate::token::Token;
 
 /// The `Statement` enum represents a statement in the Monkey language. Note that while in the original
-/// implementation, the `Statement` trait was implemented by the `Let` struct, I have chosen to
+/// implementation, the `Statement` trait was implemented by the `LetStatement` struct, I have chosen to
 /// implement the `Statement` trait via the `Statement` enum, as it allows us to store different types of
 /// statements in the same vector without having to use `Box` or `Rc` pointers and jumping through hoops.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Statement {
-    /// The `Let` struct represents a `let` statement in the Monkey language.
-    Let(Let),
+    /// The `LetStatement` struct represents a `let` statement in the Monkey language.
+    LetStatement(LetStatement),
 
-    /// The `Return` struct represents a `return` statement in the Monkey language.
-    Return(Return),
+    /// The `ReturnStatement` struct represents a `return` statement in the Monkey language.
+    ReturnStatement(ReturnStatement),
 }
 
 impl Node for Statement {
     fn token_literal(&self) -> String {
         match self {
-            Self::Let(let_statement) => let_statement.token_literal(),
-            Self::Return(return_statement) => return_statement.token_literal(),
+            Self::LetStatement(let_statement) => let_statement.token_literal(),
+            Self::ReturnStatement(return_statement) => return_statement.token_literal(),
         }
     }
 }
 
-/// The `Let` struct represents a `let` statement in the Monkey language. It contains a
+/// The `LetStatement` struct represents a `let` statement in the Monkey language. It contains a
 /// `token` field, which is the `let` token, a `name` field, which is the identifier that is being
 /// assigned to, and a `value` field, which is the expression that is being assigned to the identifier.
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Let {
+pub struct LetStatement {
     /// The `token` field is the `let` token.
     pub token: Token,
 
@@ -42,17 +42,17 @@ pub struct Let {
     pub value: Option<Box<Expression>>,
 }
 
-impl Node for Let {
+impl Node for LetStatement {
     fn token_literal(&self) -> String {
         self.token.literal.clone()
     }
 }
 
-/// The `Return` struct represents a `return` statement in the Monkey language. It contains a
+/// The `ReturnStatement` struct represents a `return` statement in the Monkey language. It contains a
 /// `token` field, which is the `return` token, and a `return_value` field, which is the expression
 /// that is being returned.
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Return {
+pub struct ReturnStatement {
     /// The `token` field is the `return` token.
     pub token: Token,
 
@@ -61,7 +61,7 @@ pub struct Return {
     pub value: Option<Box<Expression>>,
 }
 
-impl Node for Return {
+impl Node for ReturnStatement {
     fn token_literal(&self) -> String {
         self.token.literal.clone()
     }

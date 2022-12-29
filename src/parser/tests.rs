@@ -34,14 +34,14 @@ let foobar = 838383;
     }
 }
 
-/// Helper function to test a `Let` statement.
+/// Helper function to test a `LetStatement` statement.
 fn test_let_statement(stmt: &Statement, name: &str) {
-    if let Statement::Let(let_stmt) = stmt {
+    if let Statement::LetStatement(let_stmt) = stmt {
         assert_eq!(let_stmt.name.value, name);
         assert_eq!(let_stmt.name.token_literal(), name);
     } else {
         panic!(
-            "Statement is not a Let statement, got {}",
+            "Statement is not a LetStatement statement, got {}",
             stmt.token_literal()
         );
     }
@@ -69,9 +69,9 @@ return 993322;
     );
 
     for stmt in program.statements {
-        let Statement::Return(return_stmt) = stmt else {
+        let Statement::ReturnStatement(return_stmt) = stmt else {
             panic!(
-                "Statement is not a Return statement, got {}",
+                "Statement is not a ReturnStatement statement, got {}",
                 stmt.token_literal()
             );
         };

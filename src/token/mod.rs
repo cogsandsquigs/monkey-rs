@@ -33,12 +33,12 @@ impl Token {
         Self::new(
             match ident.as_str() {
                 "fn" => TokenType::Function,
-                "let" => TokenType::Let,
+                "let" => TokenType::LetStatement,
                 "if" => TokenType::If,
                 "else" => TokenType::Else,
                 "true" => TokenType::True,
                 "false" => TokenType::False,
-                "return" => TokenType::Return,
+                "return" => TokenType::ReturnStatement,
                 _ => TokenType::Ident,
             },
             ident,
@@ -86,10 +86,10 @@ pub enum TokenType {
 
     // Keywords
     Function,
-    Let,
+    LetStatement,
     If,
     Else,
-    Return,
+    ReturnStatement,
     True,
     False,
 }
@@ -121,10 +121,10 @@ impl Display for TokenType {
                 TokenType::LBrace => "{",
                 TokenType::RBrace => "}",
                 TokenType::Function => "FUNCTION",
-                TokenType::Let => "LET",
+                TokenType::LetStatement => "LET",
                 TokenType::If => "IF",
                 TokenType::Else => "ELSE",
-                TokenType::Return => "RETURN",
+                TokenType::ReturnStatement => "RETURN",
                 TokenType::True => "TRUE",
                 TokenType::False => "FALSE",
             }
