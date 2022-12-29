@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use super::{
     expression::{Expression, Identifier},
     Node,
@@ -86,5 +88,47 @@ pub struct ExpressionStatement {
 impl Node for ExpressionStatement {
     fn token_literal(&self) -> String {
         self.token.literal.clone()
+    }
+}
+
+impl Display for Statement {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::LetStatement(let_statement) => write!(f, "{}", let_statement),
+            Self::ReturnStatement(return_statement) => write!(f, "{}", return_statement),
+            Self::ExpressionStatement(expression_statement) => {
+                write!(f, "{}", expression_statement)
+            }
+        }
+    }
+}
+
+impl Display for LetStatement {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{} {} = ", self.token_literal(), self.name)?;
+
+        if let Some(value) = &self.value {
+            write!(f, "{}", value)?;
+        }
+
+        write!(f, ";")
+    }
+}
+
+impl Display for ReturnStatement {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{} ", self.token_literal())?;
+
+        if let Some(value) = &self.value {
+            write!(f, "{}", value)?;
+        }
+
+        write!(f, ";")
+    }
+}
+
+impl Display for ExpressionStatement {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.expression)
     }
 }

@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use super::Node;
 use crate::token::Token;
 
@@ -39,5 +41,19 @@ pub struct Identifier {
 impl Node for Identifier {
     fn token_literal(&self) -> String {
         self.token.literal.clone()
+    }
+}
+
+impl Display for Expression {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Identifier(identifier) => write!(f, "{}", identifier),
+        }
+    }
+}
+
+impl Display for Identifier {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.value)
     }
 }

@@ -3,10 +3,11 @@ pub mod statement;
 
 use self::statement::Statement;
 use core::fmt::Debug;
+use std::fmt::Display;
 
 /// The `Node` trait is implemented by all AST nodes. It provides a `token_literal` method, which
 /// returns the literal value of the token that the node represents. This is used for debugging.
-pub trait Node: Debug {
+pub trait Node: Debug + Display {
     /// Returns the literal value of the token that the node represents. This is used for debugging.
     fn token_literal(&self) -> String;
 }
@@ -26,5 +27,15 @@ impl Node for Program {
         } else {
             "".to_string()
         }
+    }
+}
+
+impl Display for Program {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        for statement in &self.statements {
+            write!(f, "{}", statement)?;
+        }
+
+        Ok(())
     }
 }
