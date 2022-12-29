@@ -14,10 +14,8 @@ pub trait Node: Debug {
 /// The `Program` struct represents the root node of the AST. It contains a list of statements.
 #[derive(Debug, Clone)]
 pub struct Program {
-    /// A collection of statements that are contained in the program. Note that this is a `Vec` of
-    /// `Rc` pointers to `Statement` trait objects, as 1) it allows us to clone `Program`, and 2) it
-    /// allows us to store different types of statements in the same vector.
-    statements: Vec<Statement>,
+    /// A collection of statements that are contained in the program.
+    pub statements: Vec<Statement>,
 }
 
 impl Node for Program {

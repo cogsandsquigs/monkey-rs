@@ -30,10 +30,10 @@ impl Node for Expression {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Identifier {
     /// The `token` field is the token that the identifier represents.
-    token: Token,
+    pub token: Token,
 
     /// The `value` field is the literal value of the identifier.
-    value: String,
+    pub value: String,
 }
 
 impl Node for Identifier {

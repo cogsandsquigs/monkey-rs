@@ -8,10 +8,7 @@ pub struct Token {
     /// The token type that this token is.
     pub r#type: TokenType,
 
-    /// The literal value of the token. Using `&str` instead of `String` to avoid
-    /// unnecessary allocations, as well to make significant that this is simply
-    /// a slice of the input, and not a mutable copy of it. It doesn't need to be
-    /// mutable, anyway.
+    /// The literal value of the token.
     pub literal: String,
 }
 
@@ -54,9 +51,9 @@ impl Token {
 /// the token, only the type.
 #[derive(Clone, Debug, Default, Copy, PartialEq, Eq, Hash)]
 pub enum TokenType {
-    Illegal,
     #[default]
     EOF,
+    Illegal,
 
     // Identifiers + literals
     Ident,
