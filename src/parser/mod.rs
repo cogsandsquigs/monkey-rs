@@ -85,7 +85,7 @@ impl Parser {
     /// TODO: This should return an actual error, not just `()`.
     fn parse_statement(&mut self) -> Result<Statement, ()> {
         match self.current_token.r#type {
-            TokenType::LetStatement => Ok(Statement::LetStatement(self.parse_let_statement()?)),
+            TokenType::Let => Ok(Statement::LetStatement(self.parse_let_statement()?)),
             TokenType::ReturnStatement => {
                 Ok(Statement::ReturnStatement(self.parse_return_statement()?))
             }
@@ -94,7 +94,7 @@ impl Parser {
     }
 
     /// The `parse_let_statement` method parses a `let` statement from the input. Expects the current
-    /// token to be a `TokenType::LetStatement`.
+    /// token to be a `TokenType::Let`.
     /// TODO: This should return an actual error, not just `()`.
     fn parse_let_statement(&mut self) -> Result<LetStatement, ()> {
         let token = self.current_token.clone();

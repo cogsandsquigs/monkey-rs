@@ -1,5 +1,6 @@
 pub mod expression;
 pub mod statement;
+mod tests;
 
 use self::statement::Statement;
 use core::fmt::Debug;
