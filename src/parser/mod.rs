@@ -1,3 +1,4 @@
+pub mod errors;
 mod tests;
 
 use crate::{
@@ -10,10 +11,15 @@ use crate::{
     token::{Token, TokenType},
 };
 
+use self::errors::Error;
+
 /// The parser for the Monkey programming language. It takes a `Lexer` and parses it into an AST.
 pub struct Parser {
     /// The `lexer` field is the `Lexer` that the parser is parsing.
     lexer: Lexer,
+
+    /// Any errors we encounter while parsing are stored in the `errors` field.
+    errors: Vec<Error>,
 
     /// The `current_token` field is the current token that the parser is looking at.
     current_token: Token,
@@ -29,6 +35,7 @@ impl Parser {
     pub fn new(lexer: Lexer) -> Self {
         let mut parser = Self {
             lexer,
+            errors: vec![],
             current_token: Token::default(),
             peek_token: Token::default(),
         };
@@ -37,6 +44,11 @@ impl Parser {
         parser.next_token();
 
         parser
+    }
+
+    /// Returns any and all errors that the parser has encountered so far during parsing.
+    pub fn errors(&self) -> &[Error] {
+        &self.errors
     }
 
     /// Parses the input from the `Lexer` into an AST.
@@ -129,5 +141,13 @@ impl Parser {
         } else {
             false
         }
+    }
+
+    /// The `peek_error` method creates a new `Error` with a given message, and adds it to the `errors`
+    /// field.
+    fn error(&mut self, message: &str) {
+        let error = Error::new(message);
+
+        self.errors.push(error);
     }
 }

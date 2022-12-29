@@ -17,6 +17,7 @@ let foobar = 838383;
     let mut parser = Parser::new(lexer);
 
     let program = parser.parse_program().unwrap();
+    check_parser_errors(&parser);
 
     assert_eq!(program.statements.len(), 3);
 
@@ -28,9 +29,8 @@ let foobar = 838383;
     }
 }
 
+/// Helper function to test a `Let` statement.
 fn test_let_statement(stmt: &Statement, name: &str) {
-    assert_eq!(stmt.token_literal(), "let");
-
     if let Statement::Let(let_stmt) = stmt {
         assert_eq!(let_stmt.name.value, name);
         assert_eq!(let_stmt.name.token_literal(), name);
@@ -40,4 +40,21 @@ fn test_let_statement(stmt: &Statement, name: &str) {
             stmt.token_literal()
         );
     }
+}
+
+/// Helper function to check for any errors in the parser.
+fn check_parser_errors(parser: &Parser) {
+    let errors = parser.errors();
+
+    if errors.is_empty() {
+        return;
+    }
+
+    println!("parser has {} errors", errors.len());
+
+    for error in errors {
+        println!("parser error: {}", error);
+    }
+
+    panic!("parser has {} errors", errors.len());
 }
