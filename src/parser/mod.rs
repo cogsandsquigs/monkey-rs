@@ -139,14 +139,18 @@ impl Parser {
             self.next_token();
             true
         } else {
+            self.peek_error(r#type);
             false
         }
     }
 
     /// The `peek_error` method creates a new `Error` with a given message, and adds it to the `errors`
     /// field.
-    fn error(&mut self, message: &str) {
-        let error = Error::new(message);
+    fn peek_error(&mut self, tt: TokenType) {
+        let error = Error::new(format!(
+            "expected next token to be {}, found {} instead",
+            tt, self.peek_token.r#type
+        ));
 
         self.errors.push(error);
     }

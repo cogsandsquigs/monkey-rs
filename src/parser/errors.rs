@@ -10,7 +10,7 @@ pub struct Error {
 
 impl Error {
     /// Creates a new `Error` with the given `message`.
-    pub fn new(message: &str) -> Self {
+    pub fn new<S: ToString>(message: S) -> Self {
         Self {
             message: message.to_string(),
         }

@@ -56,5 +56,5 @@ fn check_parser_errors(parser: &Parser) {
         println!("parser error: {}", error);
     }
 
-    panic!("parser has {} errors", errors.len());
+    panic!("parser has errors");
 }
