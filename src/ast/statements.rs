@@ -1,7 +1,7 @@
 use std::fmt::Display;
 
 use super::{
-    expression::{Expression, Identifier},
+    expressions::{Expression, Identifier},
     Node,
 };
 use crate::token::Token;

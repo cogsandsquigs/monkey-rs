@@ -3,8 +3,8 @@
 use crate::token::{Token, TokenType};
 
 use super::{
-    expression::{Expression, Identifier},
-    statement::{LetStatement, Statement},
+    expressions::{Expression, Identifier},
+    statements::{LetStatement, Statement},
     Program,
 };
 

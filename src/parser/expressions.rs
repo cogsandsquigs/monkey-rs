@@ -4,7 +4,7 @@ use super::{
     Parser,
 };
 use crate::{
-    ast::expression::{Expression, Identifier, InfixExpression, Integer, PrefixExpression},
+    ast::expressions::{Expression, Identifier, InfixExpression, Integer, PrefixExpression},
     token::TokenType,
 };
 

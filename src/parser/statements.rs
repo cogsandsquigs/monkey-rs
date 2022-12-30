@@ -1,8 +1,8 @@
 use super::{precedence::Precedence, Parser};
 use crate::{
     ast::{
-        expression::Identifier,
-        statement::{ExpressionStatement, LetStatement, ReturnStatement, Statement},
+        expressions::Identifier,
+        statements::{ExpressionStatement, LetStatement, ReturnStatement, Statement},
     },
     token::TokenType,
 };

@@ -1,8 +1,8 @@
-pub mod expression;
-pub mod statement;
+pub mod expressions;
+pub mod statements;
 mod tests;
 
-use self::statement::Statement;
+use self::statements::Statement;
 use core::fmt::Debug;
 use std::fmt::Display;
 

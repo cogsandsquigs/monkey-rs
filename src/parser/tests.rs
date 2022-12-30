@@ -1,7 +1,7 @@
 #![cfg(test)]
 
-use crate::ast::expression::Expression;
-use crate::ast::statement::Statement;
+use crate::ast::expressions::Expression;
+use crate::ast::statements::Statement;
 use crate::ast::Node;
 use crate::lexer::Lexer;
 use crate::parser::Parser;
