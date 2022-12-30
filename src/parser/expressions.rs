@@ -152,6 +152,22 @@ impl Parser {
         }))
     }
 
+    /// Parses a grouped expression from the input. e.g. `(5 + 5)`.
+    fn parse_grouped(&mut self) -> Result<Expression, ()> {
+        // Advance to the next token so we can parse the expression inside the parentheses.
+        self.next_token();
+
+        // Parse the expression inside the parentheses.
+        let expr = self.parse_expression(Precedence::Lowest)?;
+
+        // If the next token isn't a right parenthesis, we have an error.
+        if !self.expect_peek(TokenType::RParen) {
+            return Err(());
+        }
+
+        Ok(expr)
+    }
+
     /// Regesters a prefix function for a given token type.
     fn register_prefix(&mut self, token_type: TokenType, prefix_fn: PrefixParseFn) {
         self.prefix_parse_fns.insert(token_type, prefix_fn);
@@ -171,6 +187,7 @@ impl Parser {
         self.register_prefix(TokenType::False, Parser::parse_boolean);
         self.register_prefix(TokenType::Bang, Parser::parse_prefix);
         self.register_prefix(TokenType::Minus, Parser::parse_prefix);
+        self.register_prefix(TokenType::LParen, Parser::parse_grouped);
 
         // Registering infix tokens.
         self.register_infix(TokenType::Plus, Self::parse_infix);
