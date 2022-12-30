@@ -62,7 +62,7 @@ impl Parser {
         self.infix_parse_fns.insert(token_type, infix_fn);
     }
 
-    // Registers tokens with their respective parse functions.
+    /// Registers tokens with their respective parse functions.
     pub(crate) fn register_tokens(&mut self) {
         self.register_prefix(TokenType::Ident, Parser::parse_identifier);
         self.register_prefix(TokenType::Int, Parser::parse_integer);
