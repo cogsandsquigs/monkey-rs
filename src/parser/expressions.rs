@@ -41,8 +41,9 @@ impl Parser {
         // we need to parse this current expression first before adding it onto the tree.
         //
         // Note that currently, there is only left-associativity for operators, so we don't need to check for equal
-        // precedence and right-associativity.
-        // MAYBE: Add right-associativity for operators?
+        // precedence and right-associativity. Also, we don't need to necessarily check for a semicolon (as all other
+        // tokens that aren't operators have the precedence `Lowest`, which is less than the precedence of all operators).
+        // However, it makes the code a bit more readable, and it's a good idea to check for a semicolon anyway.
         while !self.peek_token_is(TokenType::Semicolon) && precedence < self.peek_precedence() {
             let Some(infix) = self.infix_parse_fns.get(&self.peek_token.r#type).copied() else {
                 // If we don't have an infix parse function for the next token, we can return the left-hand side of
