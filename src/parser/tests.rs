@@ -1,5 +1,7 @@
 #![cfg(test)]
 
+use std::any::Any;
+
 use crate::ast::expressions::Expression;
 use crate::ast::statements::Statement;
 use crate::ast::Node;
@@ -21,6 +23,59 @@ fn check_parser_errors(parser: &Parser) {
     }
 
     panic!("parser has errors");
+}
+
+/// Helper function to test an `Integer` expression.
+fn test_integer(expr: &Expression, value: i64) {
+    if let Expression::Integer(int) = expr {
+        assert_eq!(int.value, value);
+        assert_eq!(int.token_literal(), value.to_string());
+    } else {
+        panic!(
+            "Expression is not an IntegerLiteral expression, got {}",
+            expr.token_literal()
+        );
+    }
+}
+
+/// Helper function to test an `Identifier` expression.
+fn test_identifier(expr: &Expression, value: &str) {
+    if let Expression::Identifier(ident) = expr {
+        assert_eq!(ident.value, value);
+        assert_eq!(ident.token_literal(), value);
+    } else {
+        panic!(
+            "Expression is not an Identifier expression, got {}",
+            expr.token_literal()
+        );
+    }
+}
+
+/// Helper function to test literal expressions.
+fn test_literal(expr: &Expression, expected: &dyn Any) {
+    if expected.is::<i64>() {
+        test_integer(expr, *expected.downcast_ref::<i64>().unwrap());
+    } else if expected.is::<i32>() {
+        test_integer(expr, *expected.downcast_ref::<i32>().unwrap() as i64);
+    } else if expected.is::<&str>() {
+        test_identifier(expr, expected.downcast_ref::<&str>().unwrap());
+    } else {
+        panic!("Type of expression {} not handled", expr);
+    }
+}
+
+/// Helper function to test infix expressions.
+fn test_infix(expr: &Expression, left: &dyn Any, operator: &str, right: &dyn Any) {
+    let Expression::Infix(infix) = expr else {
+        panic!(
+            "Expression is not an Infix expression, got {}",
+            expr.token_literal()
+        );
+    };
+
+    test_literal(infix.left.as_ref(), left);
+    assert_eq!(infix.operator, operator);
+    test_literal(infix.right.as_ref(), right);
 }
 
 #[test]
@@ -48,20 +103,17 @@ let foobar = 838383;
 
     for (i, (name, value)) in tests.iter().enumerate() {
         let stmt = &program.statements[i];
-        test_let_statement(stmt, name);
-    }
-}
 
-/// Helper function to test a `LetStatement` statement.
-fn test_let_statement(stmt: &Statement, name: &str) {
-    if let Statement::LetStatement(let_stmt) = stmt {
-        assert_eq!(let_stmt.name.value, name);
-        assert_eq!(let_stmt.name.token_literal(), name);
-    } else {
-        panic!(
-            "Statement is not a LetStatement statement, got {}",
-            stmt.token_literal()
-        );
+        let Statement::LetStatement(let_stmt) = stmt else {
+            panic!(
+                "Statement is not a LetStatement statement, got {}",
+                stmt.token_literal()
+            );
+        };
+
+        test_identifier(&Expression::Identifier(let_stmt.name.clone()), name);
+
+        test_literal(let_stmt.value.as_ref().unwrap(), value);
     }
 }
 
@@ -123,16 +175,7 @@ fn test_identifier_expression() {
         );
     };
 
-    let Expression::Identifier(ident) = &stmt.expression else {
-        panic!(
-            "Expression is not an Identifier expression, got {}",
-            stmt.expression.token_literal()
-        );
-    };
-
-    assert_eq!(ident.value, "foobar");
-
-    assert_eq!(ident.token_literal(), "foobar");
+    test_identifier(&stmt.expression, "foobar");
 }
 
 /// Tests the parsing of integer literals. Note that in the original implementation, the test
@@ -163,14 +206,7 @@ fn test_integer_expression() {
         );
     };
 
-    let Expression::Integer(int) = &stmt.expression else {
-        panic!(
-            "Expression is not an IntegerLiteral expression, got {}",
-            stmt.expression.token_literal()
-        );
-    };
-
-    assert_eq!(int.value, 5);
+    test_integer(&stmt.expression, 5);
 }
 
 /// Tests the parsing of prefix expressions.
@@ -214,19 +250,6 @@ fn test_prefix_expressions() {
     }
 }
 
-/// Helper function to test an `Integer` expression.
-fn test_integer(expr: &Expression, value: i64) {
-    if let Expression::Integer(int) = expr {
-        assert_eq!(int.value, value);
-        assert_eq!(int.token_literal(), value.to_string());
-    } else {
-        panic!(
-            "Expression is not an IntegerLiteral expression, got {}",
-            expr.token_literal()
-        );
-    }
-}
-
 /// Tests the parsing of infix expressions. Note that in the original implementation, the test
 /// is called `TestParsingInfixExpressions`, but I changed the general name to fit with the ast
 /// struct name.
@@ -264,20 +287,7 @@ fn test_infix_expressions() {
             );
         };
 
-        let Expression::Infix(infix) = &stmt.expression else {
-            panic!(
-                "Expression is not an Infix expression, got {}",
-                stmt.expression.token_literal()
-            );
-        };
-
-        test_integer(&infix.left, left_value);
-
-        assert_eq!(infix.operator, operator);
-
-        test_integer(&infix.right, right_value);
-
-        assert_eq!(infix.token_literal(), operator);
+        test_infix(&stmt.expression, &left_value, operator, &right_value);
     }
 }
 
