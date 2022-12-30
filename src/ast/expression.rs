@@ -18,6 +18,12 @@ pub enum Expression {
     /// The `Integer` struct represents an integer literal in the Monkey language. Note that in the
     /// original implementation, this is called `IntegerLiteral`.
     Integer(Integer),
+
+    /// The `Prefix` struct represents a prefix expression in the Monkey language.
+    Prefix(PrefixExpression),
+
+    /// The `Infix` struct represents an infix expression in the Monkey language.
+    Infix(InfixExpression),
 }
 
 impl Node for Expression {
@@ -25,6 +31,8 @@ impl Node for Expression {
         match self {
             Self::Identifier(identifier) => identifier.token_literal(),
             Self::Integer(integer) => integer.token_literal(),
+            Self::Prefix(prefix) => prefix.token_literal(),
+            Self::Infix(infix) => infix.token_literal(),
         }
     }
 }
@@ -64,11 +72,58 @@ impl Node for Integer {
     }
 }
 
+/// The `PrefixExpression` struct represents a prefix expression in the Monkey language. For example,
+/// the expression `-5` is a prefix expression with the operator `-` and the right-hand side being the
+/// integer literal `5`.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct PrefixExpression {
+    /// The `token` field is the token that the prefix expression represents.
+    pub token: Token,
+
+    /// The `operator` field is the operator of the prefix expression.
+    pub operator: String,
+
+    /// The `right` field is the right-hand side of the prefix expression.
+    pub right: Box<Expression>,
+}
+
+impl Node for PrefixExpression {
+    fn token_literal(&self) -> String {
+        self.token.literal.clone()
+    }
+}
+
+/// The `InfixExpression` struct represents an infix expression in the Monkey language. For example,
+/// the expression `5 + 5` is an infix expression with the operator `+` and the left-hand side being
+/// the integer literal `5` and the right-hand side being the integer literal `5`.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct InfixExpression {
+    /// The `token` field is the token that the infix expression represents.
+    pub token: Token,
+
+    /// The `left` field is the left-hand side of the infix expression.
+    pub left: Box<Expression>,
+
+    /// The `operator` field is the operator of the infix expression.
+    pub operator: String,
+
+    /// The `right` field is the right-hand side of the infix expression.
+    pub right: Box<Expression>,
+}
+
+impl Node for InfixExpression {
+    fn token_literal(&self) -> String {
+        self.token.literal.clone()
+    }
+}
+
 impl Display for Expression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::Identifier(identifier) => write!(f, "{}", identifier),
             Self::Integer(integer) => write!(f, "{}", integer),
+            Self::Prefix(prefix) => write!(f, "{}", prefix),
+            Self::Infix(infix) => write!(f, "{}", infix),
         }
     }
 }
@@ -82,5 +137,17 @@ impl Display for Identifier {
 impl Display for Integer {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.value)
+    }
+}
+
+impl Display for PrefixExpression {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "({}{})", self.operator, self.right)
+    }
+}
+
+impl Display for InfixExpression {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "({} {} {})", self.left, self.operator, self.right)
     }
 }

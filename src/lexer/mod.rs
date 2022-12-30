@@ -107,11 +107,18 @@ impl Lexer {
     /// `current_position` or `next_position` fields.
     fn read_char(&mut self) -> char {
         // Bounds checking.
+        // We don't need to update`next_position` here, because
+        // we are at the end of the input string.
         if self.next_position >= self.input.len() {
             self.ch = '\0';
 
-        // We don't need to update `current_position` or `next_position` here, because
-        // we are at the end of the input string.
+            // Update `current_position` to point to the end of the input string. This is
+            // necessary because we don't want to increment `current_position` when we call
+            // `read_char` again, because we are at the end of the input string. However, if we
+            // don't do this, it becomes difficult to take slices of the input string near the
+            // end of the input string, because we would have to do bounds checking every time
+            // we take a slice.
+            self.current_position = self.next_position;
         } else {
             self.ch = self.input[self.next_position];
 
