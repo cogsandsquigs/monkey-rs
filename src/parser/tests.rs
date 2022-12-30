@@ -134,3 +134,41 @@ fn test_identifier_expression() {
 
     assert_eq!(ident.token_literal(), "foobar");
 }
+
+/// Tests the parsing of integer literals. Note that in the original implementation, the test
+/// is called `TestIntegerLiteralExpression`, but I changed the general name to fit with the
+/// ast struct name.
+#[test]
+fn test_integer_expression() {
+    let input = "5;";
+
+    let lexer = Lexer::new(input);
+    let mut parser = Parser::new(lexer);
+
+    let program = parser.parse_program().unwrap();
+
+    check_parser_errors(&parser);
+
+    assert_eq!(
+        program.statements.len(),
+        1,
+        "Expected 1 statement, but got {} statements",
+        program.statements.len()
+    );
+
+    let Statement::ExpressionStatement(stmt) = &program.statements[0] else {
+        panic!(
+            "Statement is not an ExpressionStatement statement, got {}",
+            program.statements[0].token_literal()
+        );
+    };
+
+    let Expression::Integer(int) = &stmt.expression else {
+        panic!(
+            "Expression is not an IntegerLiteral expression, got {}",
+            stmt.expression.token_literal()
+        );
+    };
+
+    assert_eq!(int.value, 5);
+}

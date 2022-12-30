@@ -1,6 +1,6 @@
 use super::{errors::Error, precedence::Precedence, Parser};
 use crate::{
-    ast::expression::{Expression, Identifier},
+    ast::expression::{Expression, Identifier, Integer},
     token::TokenType,
 };
 
@@ -27,6 +27,31 @@ impl Parser {
         Ok(left_expr)
     }
 
+    fn parse_identifier(&mut self) -> Result<Expression, ()> {
+        Ok(Expression::Identifier(Identifier {
+            token: self.current_token.clone(),
+            value: self.current_token.literal.clone(),
+        }))
+    }
+
+    fn parse_integer(&mut self) -> Result<Expression, ()> {
+        let token = self.current_token.clone();
+
+        let value = match token.literal.parse::<i64>() {
+            Ok(value) => value,
+            Err(_) => {
+                self.errors.push(Error::new(format!(
+                    "could not parse {} as integer",
+                    token.literal
+                )));
+
+                return Err(());
+            }
+        };
+
+        Ok(Expression::Integer(Integer { token, value }))
+    }
+
     /// Regesters a prefix function for a given token type.
     fn register_prefix(&mut self, token_type: TokenType, prefix_fn: PrefixParseFn) {
         self.prefix_parse_fns.insert(token_type, prefix_fn);
@@ -37,15 +62,9 @@ impl Parser {
         self.infix_parse_fns.insert(token_type, infix_fn);
     }
 
-    fn parse_identifier(&mut self) -> Result<Expression, ()> {
-        Ok(Expression::Identifier(Identifier {
-            token: self.current_token.clone(),
-            value: self.current_token.literal.clone(),
-        }))
-    }
-
     // Registers tokens with their respective parse functions.
     pub(crate) fn register_tokens(&mut self) {
         self.register_prefix(TokenType::Ident, Parser::parse_identifier);
+        self.register_prefix(TokenType::Int, Parser::parse_integer);
     }
 }
