@@ -12,16 +12,19 @@ use crate::token::Token;
 /// pain to work with.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Expression {
-    /// The `Identifier` struct represents an identifier in the Monkey language. It contains a `token`
-    /// field, which is the token that the identifier represents, and a `value` field, which is the
-    /// literal value of the identifier.
+    /// The `Identifier` struct represents an identifier in the Monkey language.
     Identifier(Identifier),
+
+    /// The `Integer` struct represents an integer literal in the Monkey language. Note that in the
+    /// original implementation, this is called `IntegerLiteral`.
+    Integer(Integer),
 }
 
 impl Node for Expression {
     fn token_literal(&self) -> String {
         match self {
             Self::Identifier(identifier) => identifier.token_literal(),
+            Self::Integer(integer) => integer.token_literal(),
         }
     }
 }
@@ -44,15 +47,39 @@ impl Node for Identifier {
     }
 }
 
+/// The `Integer` struct represents an integer literal in the Monkey language. Note that in the
+/// original implementation, this is called `IntegerLiteral`.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Integer {
+    /// The `token` field is the token that the integer literal represents.
+    pub token: Token,
+
+    /// The `value` field is the literal value of the integer literal.
+    pub value: i64,
+}
+
+impl Node for Integer {
+    fn token_literal(&self) -> String {
+        self.token.literal.clone()
+    }
+}
+
 impl Display for Expression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::Identifier(identifier) => write!(f, "{}", identifier),
+            Self::Integer(integer) => write!(f, "{}", integer),
         }
     }
 }
 
 impl Display for Identifier {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.value)
+    }
+}
+
+impl Display for Integer {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.value)
     }
