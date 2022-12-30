@@ -1,12 +1,11 @@
 #![cfg(test)]
 
-use std::any::Any;
-
 use crate::ast::expressions::Expression;
 use crate::ast::statements::Statement;
 use crate::ast::Node;
 use crate::lexer::Lexer;
 use crate::parser::Parser;
+use std::any::Any;
 
 /// Helper function to check for any errors in the parser.
 fn check_parser_errors(parser: &Parser) {
@@ -38,6 +37,19 @@ fn test_integer(expr: &Expression, value: i64) {
     }
 }
 
+/// Helper function to test a `Boolean` expression.
+fn test_boolean(expr: &Expression, value: bool) {
+    if let Expression::Boolean(b) = expr {
+        assert_eq!(b.value, value);
+        assert_eq!(b.token_literal(), value.to_string());
+    } else {
+        panic!(
+            "Expression is not an IntegerLiteral expression, got {}",
+            expr.token_literal()
+        );
+    }
+}
+
 /// Helper function to test an `Identifier` expression.
 fn test_identifier(expr: &Expression, value: &str) {
     if let Expression::Identifier(ident) = expr {
@@ -57,6 +69,8 @@ fn test_literal(expr: &Expression, expected: &dyn Any) {
         test_integer(expr, *expected.downcast_ref::<i64>().unwrap());
     } else if expected.is::<i32>() {
         test_integer(expr, *expected.downcast_ref::<i32>().unwrap() as i64);
+    } else if expected.is::<bool>() {
+        test_boolean(expr, *expected.downcast_ref::<bool>().unwrap());
     } else if expected.is::<&str>() {
         test_identifier(expr, expected.downcast_ref::<&str>().unwrap());
     } else {
@@ -209,10 +223,46 @@ fn test_integer_expression() {
     test_integer(&stmt.expression, 5);
 }
 
+/// Tests the parsing of boolean literals.
+#[test]
+fn test_boolean_expression() {
+    let input = r"
+true;
+false;";
+
+    let lexer = Lexer::new(input);
+    let mut parser = Parser::new(lexer);
+
+    let program = parser.parse_program().unwrap();
+    check_parser_errors(&parser);
+
+    assert_eq!(
+        program.statements.len(),
+        2,
+        "Expected 2 statements, but got {} statements",
+        program.statements.len()
+    );
+
+    for (i, expected) in vec![true, false].iter().enumerate() {
+        let Statement::ExpressionStatement(stmt) = &program.statements[i] else {
+            panic!(
+                "Statement is not an ExpressionStatement statement, got {}",
+                program.statements[i].token_literal()
+            );
+        };
+
+        test_boolean(&stmt.expression, *expected);
+    }
+}
+
 /// Tests the parsing of prefix expressions.
 #[test]
 fn test_prefix_expressions() {
-    let prefix_tests = vec![("!5;", "!", 5), ("-15;", "-", 15)];
+    let prefix_tests: Vec<(&str, &str, &dyn Any)> = vec![
+        ("-15;", "-", &15),
+        ("!true;", "!", &true),
+        ("!false;", "!", &false),
+    ];
 
     for (input, operator, value) in prefix_tests {
         let lexer = Lexer::new(input);
@@ -244,7 +294,7 @@ fn test_prefix_expressions() {
 
         assert_eq!(prefix.operator, operator);
 
-        test_integer(&prefix.right, value);
+        test_literal(&prefix.right, value);
 
         assert_eq!(prefix.token_literal(), operator);
     }
@@ -255,15 +305,18 @@ fn test_prefix_expressions() {
 /// struct name.
 #[test]
 fn test_infix_expressions() {
-    let infix_tests = vec![
-        ("5 + 5;", 5, "+", 5),
-        ("5 - 5;", 5, "-", 5),
-        ("5 * 5;", 5, "*", 5),
-        ("5 / 5;", 5, "/", 5),
-        ("5 > 5;", 5, ">", 5),
-        ("5 < 5;", 5, "<", 5),
-        ("5 == 5;", 5, "==", 5),
-        ("5 != 5;", 5, "!=", 5),
+    let infix_tests: Vec<(&str, &dyn Any, &str, &dyn Any)> = vec![
+        ("5 + 5;", &5, "+", &5),
+        ("5 - 5;", &5, "-", &5),
+        ("5 * 5;", &5, "*", &5),
+        ("5 / 5;", &5, "/", &5),
+        ("5 > 5;", &5, ">", &5),
+        ("5 < 5;", &5, "<", &5),
+        ("5 == 5;", &5, "==", &5),
+        ("5 != 5;", &5, "!=", &5),
+        ("true == true", &true, "==", &true),
+        ("true != false", &true, "!=", &false),
+        ("false == false", &false, "==", &false),
     ];
 
     for (input, left_value, operator, right_value) in infix_tests {
@@ -287,7 +340,7 @@ fn test_infix_expressions() {
             );
         };
 
-        test_infix(&stmt.expression, &left_value, operator, &right_value);
+        test_infix(&stmt.expression, left_value, operator, right_value);
     }
 }
 
@@ -310,6 +363,32 @@ fn test_operator_precedence_parsing() {
             "3 + 4 * 5 == 3 * 1 + 4 * 5",
             "((3 + (4 * 5)) == ((3 * 1) + (4 * 5)))",
         ),
+        ("true", "true"),
+        ("false", "false"),
+        ("3 > 5 == false", "((3 > 5) == false)"),
+        ("3 < 5 == true", "((3 < 5) == true)"),
+        // ("1 + (2 + 3) + 4", "((1 + (2 + 3)) + 4)"),
+        // ("(5 + 5) * 2", "((5 + 5) * 2)"),
+        // ("2 / (5 + 5)", "(2 / (5 + 5))"),
+        // ("-(5 + 5)", "(-(5 + 5))"),
+        // ("!(true == true)", "(!(true == true))"),
+        // ("a + add(b * c) + d", "((a + add((b * c))) + d)"),
+        // (
+        //     "add(a, b, 1, 2 * 3, 4 + 5, add(6, 7 * 8))",
+        //     "add(a, b, 1, (2 * 3), (4 + 5), add(6, (7 * 8)))",
+        // ),
+        // (
+        //     "add(a + b + c * d / f + g)",
+        //     "add((((a + b) + ((c * d) / f)) + g))",
+        // ),
+        // (
+        //     "a * [1, 2, 3, 4][b * c] * d",
+        //     "((a * ([1, 2, 3, 4][(b * c)])) * d)",
+        // ),
+        // (
+        //     "add(a * b[2], b[1], 2 * [1, 2][1])",
+        //     "add((a * (b[2])), (b[1]), (2 * ([1, 2][1])))",
+        // ),
     ];
 
     for (input, expected) in tests {

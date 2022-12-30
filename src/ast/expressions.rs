@@ -19,6 +19,10 @@ pub enum Expression {
     /// original implementation, this is called `IntegerLiteral`.
     Integer(Integer),
 
+    /// The `Boolean` struct represents a boolean literal in the Monkey language. Note that in the
+    /// original implementation, this is called `BooleanLiteral`.
+    Boolean(Boolean),
+
     /// The `Prefix` struct represents a prefix expression in the Monkey language.
     Prefix(PrefixExpression),
 
@@ -31,6 +35,7 @@ impl Node for Expression {
         match self {
             Self::Identifier(identifier) => identifier.token_literal(),
             Self::Integer(integer) => integer.token_literal(),
+            Self::Boolean(boolean) => boolean.token_literal(),
             Self::Prefix(prefix) => prefix.token_literal(),
             Self::Infix(infix) => infix.token_literal(),
         }
@@ -67,6 +72,23 @@ pub struct Integer {
 }
 
 impl Node for Integer {
+    fn token_literal(&self) -> String {
+        self.token.literal.clone()
+    }
+}
+
+/// The `Boolean` struct represents a boolean literal in the Monkey language. Note that in the
+/// original implementation, this is called `BooleanLiteral`.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Boolean {
+    /// The `token` field is the token that the boolean literal represents.
+    pub token: Token,
+
+    /// The `value` field is the literal value of the boolean literal.
+    pub value: bool,
+}
+
+impl Node for Boolean {
     fn token_literal(&self) -> String {
         self.token.literal.clone()
     }
@@ -122,6 +144,7 @@ impl Display for Expression {
         match self {
             Self::Identifier(identifier) => write!(f, "{}", identifier),
             Self::Integer(integer) => write!(f, "{}", integer),
+            Self::Boolean(boolean) => write!(f, "{}", boolean),
             Self::Prefix(prefix) => write!(f, "{}", prefix),
             Self::Infix(infix) => write!(f, "{}", infix),
         }
@@ -135,6 +158,12 @@ impl Display for Identifier {
 }
 
 impl Display for Integer {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.value)
+    }
+}
+
+impl Display for Boolean {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.value)
     }

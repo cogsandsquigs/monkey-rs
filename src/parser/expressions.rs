@@ -4,7 +4,9 @@ use super::{
     Parser,
 };
 use crate::{
-    ast::expressions::{Expression, Identifier, InfixExpression, Integer, PrefixExpression},
+    ast::expressions::{
+        Boolean, Expression, Identifier, InfixExpression, Integer, PrefixExpression,
+    },
     token::TokenType,
 };
 
@@ -90,6 +92,14 @@ impl Parser {
         Ok(Expression::Integer(Integer { token, value }))
     }
 
+    /// Parses a boolean from the input.
+    fn parse_boolean(&mut self) -> Result<Expression, ()> {
+        Ok(Expression::Boolean(Boolean {
+            token: self.current_token.clone(),
+            value: self.cur_token_is(TokenType::True),
+        }))
+    }
+
     /// Parses a prefix expression from the input. e.g. `!5` or `-15`.
     fn parse_prefix(&mut self) -> Result<Expression, ()> {
         let token = self.current_token.clone();
@@ -157,6 +167,8 @@ impl Parser {
         // Registering prefix tokens.
         self.register_prefix(TokenType::Ident, Parser::parse_identifier);
         self.register_prefix(TokenType::Int, Parser::parse_integer);
+        self.register_prefix(TokenType::True, Parser::parse_boolean);
+        self.register_prefix(TokenType::False, Parser::parse_boolean);
         self.register_prefix(TokenType::Bang, Parser::parse_prefix);
         self.register_prefix(TokenType::Minus, Parser::parse_prefix);
 
