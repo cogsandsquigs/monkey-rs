@@ -27,7 +27,7 @@ impl Parser {
         let token = self.current_token.clone();
 
         if !self.expect_peek(TokenType::Ident) {
-            return Err(()); // TODO: ReturnStatement an actual error.
+            return Err(()); // TODO: return an actual error.
         }
 
         let name = Identifier {
@@ -37,8 +37,13 @@ impl Parser {
 
         // Need to check for `TokenType::Assign` here.
         if !self.expect_peek(TokenType::Assign) {
-            return Err(()); // TODO: ReturnStatement an actual error.
+            return Err(()); // TODO: return an actual error.
         }
+
+        // Advance, as the current token is an `Assign`.
+        self.next_token();
+
+        let value = self.parse_expression(Precedence::Lowest)?;
 
         // TODO: We're skipping expressions until we get to the semicolon.
         while !self.cur_token_is(TokenType::Semicolon) {
@@ -48,7 +53,7 @@ impl Parser {
         Ok(LetStatement {
             token,
             name,
-            value: None,
+            value: Box::new(value),
         })
     }
 
@@ -59,13 +64,16 @@ impl Parser {
 
         self.next_token();
 
-        // TODO: We're skipping the expressions until we
-        // encounter a semicolon
+        let return_value = self.parse_expression(Precedence::Lowest)?;
+
         while !self.cur_token_is(TokenType::Semicolon) {
             self.next_token()
         }
 
-        Ok(ReturnStatement { token, value: None })
+        Ok(ReturnStatement {
+            token,
+            return_value: Box::new(return_value),
+        })
     }
 
     fn parse_expression_statement(&mut self) -> Result<ExpressionStatement, ()> {

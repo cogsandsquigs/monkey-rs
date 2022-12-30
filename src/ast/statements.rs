@@ -45,7 +45,7 @@ pub struct LetStatement {
 
     /// The `value` field is the expression that is being assigned to the identifier.
     /// TODO: Get rid of the `Option` here, only necessary b/c we aren't parsing expressions yet.
-    pub value: Option<Box<Expression>>,
+    pub value: Box<Expression>,
 }
 
 impl Node for LetStatement {
@@ -64,7 +64,7 @@ pub struct ReturnStatement {
 
     /// The `value` field is the expression that is being returned.
     /// TODO: Get rid of the `Option` here, only necessary b/c we aren't parsing expressions yet.
-    pub value: Option<Box<Expression>>,
+    pub return_value: Box<Expression>,
 }
 
 impl Node for ReturnStatement {
@@ -105,25 +105,19 @@ impl Display for Statement {
 
 impl Display for LetStatement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{} {} = ", self.token_literal(), self.name)?;
-
-        if let Some(value) = &self.value {
-            write!(f, "{}", value)?;
-        }
-
-        write!(f, ";")
+        write!(
+            f,
+            "{} {} = {};",
+            self.token_literal(),
+            self.name,
+            self.value
+        )
     }
 }
 
 impl Display for ReturnStatement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{} ", self.token_literal())?;
-
-        if let Some(value) = &self.value {
-            write!(f, "{}", value)?;
-        }
-
-        write!(f, ";")
+        write!(f, "{} {};", self.token_literal(), self.return_value)
     }
 }
 

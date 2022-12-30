@@ -23,13 +23,13 @@ fn test_formatting() {
                 },
                 value: "myVar".to_string(),
             },
-            value: Some(Box::new(Expression::Identifier(Identifier {
+            value: Box::new(Expression::Identifier(Identifier {
                 token: Token {
                     r#type: TokenType::Ident,
                     literal: "anotherVar".to_string(),
                 },
                 value: "anotherVar".to_string(),
-            }))),
+            })),
         })],
     };
 

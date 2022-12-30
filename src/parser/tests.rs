@@ -94,73 +94,73 @@ fn test_infix(expr: &Expression, left: &dyn Any, operator: &str, right: &dyn Any
 
 #[test]
 fn test_let_statements() {
-    let input = r#"
-let x = 5;
-let y = 10;
-let foobar = 838383;
-"#;
+    let tests: Vec<(&str, &str, &dyn Any)> = vec![
+        ("let x = 5;", "x", &5),
+        ("let y = true;", "y", &true),
+        ("let foobar = y;", "foobar", &"y"),
+    ];
 
-    let lexer = Lexer::new(input);
-    let mut parser = Parser::new(lexer);
+    for (input, expected_identifier, expected_value) in tests {
+        let lexer = Lexer::new(input);
+        let mut parser = Parser::new(lexer);
 
-    let program = parser.parse_program().unwrap();
-    check_parser_errors(&parser);
+        let program = parser.parse_program().unwrap();
+        check_parser_errors(&parser);
 
-    assert_eq!(
-        program.statements.len(),
-        3,
-        "Expected 3 statements, but got {} statements",
-        program.statements.len()
-    );
+        assert_eq!(
+            program.statements.len(),
+            1,
+            "Expected 1 statement, but got {} statements",
+            program.statements.len()
+        );
 
-    let tests = vec![("x", 5), ("y", 10), ("foobar", 838383)];
-
-    for (i, (name, value)) in tests.iter().enumerate() {
-        let stmt = &program.statements[i];
-
-        let Statement::LetStatement(let_stmt) = stmt else {
+        let Statement::LetStatement(stmt) = &program.statements[0] else {
             panic!(
                 "Statement is not a LetStatement statement, got {}",
-                stmt.token_literal()
+                program.statements[0].token_literal()
             );
         };
 
-        test_identifier(&Expression::Identifier(let_stmt.name.clone()), name);
+        assert_eq!(stmt.token_literal(), "let");
+        assert_eq!(stmt.name.value, expected_identifier);
+        assert_eq!(stmt.name.token_literal(), expected_identifier);
 
-        test_literal(let_stmt.value.as_ref().unwrap(), value);
+        test_literal(&stmt.value, expected_value);
     }
 }
 
 #[test]
 fn test_return_statements() {
-    let input = r#"
-return 5;
-return 10;
-return 993322;
-"#;
+    let tests: Vec<(&str, &dyn Any)> = vec![
+        ("return 5;", &5),
+        ("return true;", &true),
+        ("return foobar;", &"foobar"),
+    ];
 
-    let lexer = Lexer::new(input);
-    let mut parser = Parser::new(lexer);
+    for (input, expected_value) in tests {
+        let lexer = Lexer::new(input);
+        let mut parser = Parser::new(lexer);
 
-    let program = parser.parse_program().unwrap();
-    check_parser_errors(&parser);
+        let program = parser.parse_program().unwrap();
+        check_parser_errors(&parser);
 
-    assert_eq!(
-        program.statements.len(),
-        3,
-        "Expected 3 statements, but got {} statements",
-        program.statements.len()
-    );
+        assert_eq!(
+            program.statements.len(),
+            1,
+            "Expected 1 statement, but got {} statements",
+            program.statements.len()
+        );
 
-    for stmt in program.statements {
-        let Statement::ReturnStatement(return_stmt) = stmt else {
+        let Statement::ReturnStatement(stmt) = &program.statements[0] else {
             panic!(
                 "Statement is not a ReturnStatement statement, got {}",
-                stmt.token_literal()
+                program.statements[0].token_literal()
             );
         };
 
-        assert_eq!(return_stmt.token_literal(), "return");
+        assert_eq!(stmt.token_literal(), "return");
+
+        test_literal(&stmt.return_value, expected_value);
     }
 }
 
