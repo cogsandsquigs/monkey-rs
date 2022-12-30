@@ -7,23 +7,6 @@ use crate::lexer::Lexer;
 use crate::parser::Parser;
 use std::any::Any;
 
-/// Helper function to check for any errors in the parser.
-fn check_parser_errors(parser: &Parser) {
-    let errors = parser.errors();
-
-    if errors.is_empty() {
-        return;
-    }
-
-    println!("parser has {} errors", errors.len());
-
-    for error in errors {
-        println!("parser error: {}", error);
-    }
-
-    panic!("parser has errors");
-}
-
 /// Helper function to test an `Integer` expression.
 fn test_integer(expr: &Expression, value: i64) {
     if let Expression::Integer(int) = expr {
@@ -105,7 +88,6 @@ fn test_let_statements() {
         let mut parser = Parser::new(lexer);
 
         let program = parser.parse_program().unwrap();
-        check_parser_errors(&parser);
 
         assert_eq!(
             program.statements.len(),
@@ -142,7 +124,6 @@ fn test_return_statements() {
         let mut parser = Parser::new(lexer);
 
         let program = parser.parse_program().unwrap();
-        check_parser_errors(&parser);
 
         assert_eq!(
             program.statements.len(),
@@ -173,7 +154,6 @@ fn test_identifier_expression() {
     let mut parser = Parser::new(lexer);
 
     let program = parser.parse_program().unwrap();
-    check_parser_errors(&parser);
 
     assert_eq!(
         program.statements.len(),
@@ -204,8 +184,6 @@ fn test_integer_expression() {
 
     let program = parser.parse_program().unwrap();
 
-    check_parser_errors(&parser);
-
     assert_eq!(
         program.statements.len(),
         1,
@@ -234,7 +212,6 @@ false;";
     let mut parser = Parser::new(lexer);
 
     let program = parser.parse_program().unwrap();
-    check_parser_errors(&parser);
 
     assert_eq!(
         program.statements.len(),
@@ -269,7 +246,6 @@ fn test_prefix_expressions() {
         let mut parser = Parser::new(lexer);
 
         let program = parser.parse_program().unwrap();
-        check_parser_errors(&parser);
 
         assert_eq!(
             program.statements.len(),
@@ -324,7 +300,6 @@ fn test_infix_expressions() {
         let mut parser = Parser::new(lexer);
 
         let program = parser.parse_program().unwrap();
-        check_parser_errors(&parser);
 
         assert_eq!(
             program.statements.len(),
@@ -396,8 +371,118 @@ fn test_operator_precedence_parsing() {
         let mut parser = Parser::new(lexer);
 
         let program = parser.parse_program().unwrap();
-        check_parser_errors(&parser);
 
         assert_eq!(program.to_string(), expected);
     }
+}
+
+/// Testing the parsing of if expressions.
+#[test]
+fn test_if_expressions() {
+    let input = "if (x < y) { x }";
+    let lexer = Lexer::new(input);
+    let mut parser = Parser::new(lexer);
+
+    let program = parser.parse_program().unwrap();
+
+    assert_eq!(
+        program.statements.len(),
+        1,
+        "Expected 1 statement, but got {} statements",
+        program.statements.len()
+    );
+
+    let Statement::ExpressionStatement(stmt) = &program.statements[0] else {
+        panic!(
+            "Statement is not an ExpressionStatement statement, got {}",
+            program.statements[0].token_literal()
+        );
+    };
+
+    let Expression::If(if_expr) = &stmt.expression else {
+        panic!(
+            "Expression is not an IfExpression expression, got {}",
+            stmt.expression.token_literal()
+        );
+    };
+
+    test_infix(&if_expr.condition, &"x", "<", &"y");
+
+    assert_eq!(
+        if_expr.consequence.statements.len(),
+        1,
+        "Expected 1 statement, but got {} statements",
+        if_expr.consequence.statements.len()
+    );
+
+    let Statement::ExpressionStatement(consequence) = &if_expr.consequence.statements[0] else {
+        panic!(
+            "Statement is not an ExpressionStatement statement, got {}",
+            if_expr.consequence.statements[0].token_literal()
+        );
+    };
+
+    test_identifier(&consequence.expression, "x");
+
+    assert!(if_expr.alternative.is_none());
+}
+
+/// Tests the parsing of if-else expressions.
+#[test]
+fn test_if_else_expressions() {
+    let input = "if (x < y) { x } else { y }";
+    let lexer = Lexer::new(input);
+    let mut parser = Parser::new(lexer);
+
+    let program = parser.parse_program().unwrap();
+
+    assert_eq!(
+        program.statements.len(),
+        1,
+        "Expected 1 statement, but got {} statements",
+        program.statements.len()
+    );
+
+    let Statement::ExpressionStatement(stmt) = &program.statements[0] else {
+        panic!(
+            "Statement is not an ExpressionStatement statement, got {}",
+            program.statements[0].token_literal()
+        );
+    };
+
+    let Expression::If(if_expr) = &stmt.expression else {
+        panic!(
+            "Expression is not an IfExpression expression, got {}",
+            stmt.expression.token_literal()
+        );
+    };
+
+    test_infix(&if_expr.condition, &"x", "<", &"y");
+
+    assert_eq!(
+        if_expr.consequence.statements.len(),
+        1,
+        "Expected 1 statement, but got {} statements",
+        if_expr.consequence.statements.len()
+    );
+
+    let Statement::ExpressionStatement(consequence) = &if_expr.consequence.statements[0] else {
+        panic!(
+            "Statement is not an ExpressionStatement statement, got {}",
+            if_expr.consequence.statements[0].token_literal()
+        );
+    };
+
+    test_identifier(&consequence.expression, "x");
+
+    assert!(if_expr.alternative.is_some());
+
+    let Statement::ExpressionStatement(alternative) = if_expr.alternative.as_ref().unwrap().statements[0].clone() else {
+        panic!(
+            "Statement is not an ExpressionStatement statement, got {}",
+            if_expr.alternative.as_ref().unwrap().statements[0].token_literal()
+        );
+    };
+
+    test_identifier(&alternative.expression, "y");
 }
