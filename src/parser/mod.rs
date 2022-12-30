@@ -55,6 +55,9 @@ impl Parser {
             infix_parse_fns: HashMap::new(),
         };
 
+        // Register tokens with their respective parse functions.
+        parser.register_tokens();
+
         // Prime the parser by calling `next_token` twice.
         parser.next_token();
         parser.next_token();
