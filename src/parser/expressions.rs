@@ -23,11 +23,9 @@ impl Parser {
     /// Expects the current token to be the first token of the expression, i.e. a literal value/grouped expression/identifier.
     pub(crate) fn parse_expression(&mut self, precedence: Precedence) -> ParseResult<Expression> {
         let Some(prefix) = self.prefix_parse_fns.get(&self.current_token.r#type) else {
-            self.errors.push(Error::new(
+            return Err(Error::new(
                 format!("no prefix parse function for {} found", self.current_token.r#type),
             ));
-
-            return Err(());
         };
 
         // Mutable because we may need to modify the left-hand side of the expression later on in the loop.
@@ -82,12 +80,10 @@ impl Parser {
         let value = match token.literal.parse::<i64>() {
             Ok(value) => value,
             Err(_) => {
-                self.errors.push(Error::new(format!(
+                return Err(Error::new(format!(
                     "could not parse {} as integer",
                     token.literal
                 )));
-
-                return Err(());
             }
         };
 
@@ -153,9 +149,7 @@ impl Parser {
         let expr = self.parse_expression(Precedence::Lowest)?;
 
         // If the next token isn't a right parenthesis, we have an error.
-        if !self.expect_peek(TokenType::RParen) {
-            return Err(());
-        }
+        self.expect_peek(TokenType::RParen)?;
 
         Ok(expr)
     }
@@ -166,9 +160,7 @@ impl Parser {
         let token = self.current_token.clone();
 
         // If the next token isn't a left parenthesis, we have an error.
-        if !self.expect_peek(TokenType::LParen) {
-            return Err(());
-        }
+        self.expect_peek(TokenType::LParen)?;
 
         // Advance to the next token so we can parse the condition expression.
         self.next_token();
@@ -177,14 +169,10 @@ impl Parser {
         let condition = self.parse_expression(Precedence::Lowest)?;
 
         // If the next token isn't a right parenthesis, we have an error.
-        if !self.expect_peek(TokenType::RParen) {
-            return Err(());
-        }
+        self.expect_peek(TokenType::RParen)?;
 
         // If the next token isn't a left brace, we have an error.
-        if !self.expect_peek(TokenType::LBrace) {
-            return Err(());
-        }
+        self.expect_peek(TokenType::LBrace)?;
 
         // Parse the consequence block.
         let consequence = self.parse_block_statement()?;
@@ -195,9 +183,7 @@ impl Parser {
             self.next_token();
 
             // If the next token isn't a left brace, we have an error.
-            if !self.expect_peek(TokenType::LBrace) {
-                return Err(());
-            }
+            self.expect_peek(TokenType::LBrace)?;
 
             // Parse the alternative block.
             Some(self.parse_block_statement()?)
@@ -219,17 +205,13 @@ impl Parser {
         let token = self.current_token.clone();
 
         // If the next token isn't a left parenthesis, we have an error.
-        if !self.expect_peek(TokenType::LParen) {
-            return Err(());
-        }
+        self.expect_peek(TokenType::LParen)?;
 
         // Parse the function's parameters.
         let parameters = self.parse_function_parameters()?;
 
         // If the next token isn't a left brace, we have an error.
-        if !self.expect_peek(TokenType::LBrace) {
-            return Err(());
-        }
+        self.expect_peek(TokenType::LBrace)?;
 
         // Parse the function's body.
         let body = self.parse_block_statement()?;
@@ -258,7 +240,9 @@ impl Parser {
         // Parse the first parameter.
         let Expression::Identifier(identifier) = self.parse_identifier()? else {
             // TODO: Error handling.
-            return Err(());
+            return Err(Error::new(
+                "Expected an identifier in function literal parameters",
+            ));
         };
 
         identifiers.push(identifier);
@@ -278,16 +262,16 @@ impl Parser {
             // Parse the next parameter.
             let Expression::Identifier(identifier) = self.parse_identifier()? else {
                 // TODO: Error handling.
-                return Err(());
+                return Err(Error::new(
+                    "Expected an identifier in function literal parameters",
+                ));
             };
 
             identifiers.push(identifier);
         }
 
         // If the next token isn't a right parenthesis, we have an error.
-        if !self.expect_peek(TokenType::RParen) {
-            return Err(());
-        }
+        self.expect_peek(TokenType::RParen)?;
 
         Ok(identifiers)
     }
@@ -340,9 +324,7 @@ impl Parser {
         }
 
         // If the next token isn't a right parenthesis, we have an error.
-        if !self.expect_peek(TokenType::RParen) {
-            return Err(());
-        }
+        self.expect_peek(TokenType::RParen)?;
 
         Ok(arguments)
     }

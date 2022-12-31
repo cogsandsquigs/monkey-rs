@@ -26,9 +26,7 @@ impl Parser {
     fn parse_let_statement(&mut self) -> ParseResult<LetStatement> {
         let token = self.current_token.clone();
 
-        if !self.expect_peek(TokenType::Ident) {
-            return Err(()); // TODO: return an actual error.
-        }
+        self.expect_peek(TokenType::Ident)?;
 
         let name = Identifier {
             token: self.current_token.clone(),
@@ -36,9 +34,7 @@ impl Parser {
         };
 
         // Need to check for `TokenType::Assign` here.
-        if !self.expect_peek(TokenType::Assign) {
-            return Err(()); // TODO: return an actual error.
-        }
+        self.expect_peek(TokenType::Assign)?;
 
         // Advance, as the current token is an `Assign`.
         self.next_token();
