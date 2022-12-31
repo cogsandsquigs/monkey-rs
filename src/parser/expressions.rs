@@ -188,11 +188,27 @@ impl Parser {
         // Parse the consequence block.
         let consequence = self.parse_block_statement()?;
 
+        // Parse the alternative block, if it exists.
+        let alternative = if self.peek_token_is(TokenType::Else) {
+            // Advance to the next token so we can parse the alternative block.
+            self.next_token();
+
+            // If the next token isn't a left brace, we have an error.
+            if !self.expect_peek(TokenType::LBrace) {
+                return Err(());
+            }
+
+            // Parse the alternative block.
+            Some(self.parse_block_statement()?)
+        } else {
+            None
+        };
+
         Ok(Expression::If(IfExpression {
             token,
             condition: Box::new(condition),
             consequence,
-            alternative: None,
+            alternative,
         }))
     }
 }
