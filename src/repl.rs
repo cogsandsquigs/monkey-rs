@@ -1,4 +1,4 @@
-use crate::token::TokenType;
+use crate::{lexer::Lexer, parser::Parser};
 use std::io::{BufRead, BufReader, Read, Result, Write};
 
 const PROMPT: &str = ">> ";
@@ -30,17 +30,26 @@ pub fn start<I: Read, O: Write>(inp: I, mut out: O) -> Result<()> {
         reader.read_line(&mut line)?;
 
         // Lex the line
-        let mut lexer = super::lexer::Lexer::new(&line);
+        let lexer = Lexer::new(&line);
+        let mut parser = Parser::new(lexer);
 
         loop {
-            let token = lexer.next_token();
-            if token.r#type == TokenType::EOF {
-                break;
-            }
+            let parsed = parser.parse_program();
 
-            // Print the token.
-            out.write_all(format!("{:?}\n", token).as_bytes())?;
-            out.flush()?;
+            match parsed {
+                Ok(program) => {
+                    writeln!(out, "{}", program)?;
+                    break;
+                }
+                Err(errors) => {
+                    writeln!(out, "{}", MONKEY_FACE)?;
+                    writeln!(out, "Woops! We ran into some monkey business here!")?;
+                    writeln!(out, " parser errors:")?;
+                    for error in errors {
+                        writeln!(out, "\t{}", error)?;
+                    }
+                }
+            }
         }
     }
 }
