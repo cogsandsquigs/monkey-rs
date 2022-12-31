@@ -486,3 +486,56 @@ fn test_if_else_expressions() {
 
     test_identifier(&alternative.expression, "y");
 }
+
+/// Test the parsing of function literals.
+#[test]
+fn test_function_literals() {
+    let input = "fn(x, y) { x + y; }";
+    let lexer = Lexer::new(input);
+    let mut parser = Parser::new(lexer);
+
+    let program = parser.parse_program().unwrap();
+
+    assert_eq!(
+        program.statements.len(),
+        1,
+        "Expected 1 statement, but got {} statements",
+        program.statements.len()
+    );
+
+    let Statement::ExpressionStatement(stmt) = &program.statements[0] else {
+        panic!(
+            "Statement is not an ExpressionStatement statement, got {}",
+            program.statements[0].token_literal()
+        );
+    };
+
+    let Expression::FunctionLiteral(function) = &stmt.expression else {
+        panic!(
+            "Expression is not a FunctionLiteral expression, got {}",
+            stmt.expression.token_literal()
+        );
+    };
+
+    assert_eq!(function.parameters.len(), 2);
+
+    assert_eq!(function.parameters[0].token_literal(), "x");
+
+    assert_eq!(function.parameters[1].token_literal(), "y");
+
+    assert_eq!(
+        function.body.statements.len(),
+        1,
+        "Expected 1 statement, but got {} statements",
+        function.body.statements.len()
+    );
+
+    let Statement::ExpressionStatement(body) = &function.body.statements[0] else {
+        panic!(
+            "Statement is not an ExpressionStatement statement, got {}",
+            function.body.statements[0].token_literal()
+        );
+    };
+
+    test_infix(&body.expression, &"x", "+", &"y");
+}

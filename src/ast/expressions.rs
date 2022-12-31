@@ -20,6 +20,9 @@ pub enum Expression {
     /// The `BooleanLiteral` struct represents a boolean literal in the Monkey language.
     BooleanLiteral(BooleanLiteral),
 
+    /// The `FunctionLiteral` struct represents a function literal in the Monkey language.
+    FunctionLiteral(FunctionLiteral),
+
     /// The `Prefix` struct represents a prefix expression in the Monkey language.
     Prefix(PrefixExpression),
 
@@ -36,6 +39,7 @@ impl Node for Expression {
             Self::Identifier(identifier) => identifier.token_literal(),
             Self::IntegerLiteral(integer) => integer.token_literal(),
             Self::BooleanLiteral(boolean) => boolean.token_literal(),
+            Self::FunctionLiteral(function) => function.token_literal(),
             Self::Prefix(prefix) => prefix.token_literal(),
             Self::Infix(infix) => infix.token_literal(),
             Self::If(if_expression) => if_expression.token_literal(),
@@ -106,6 +110,12 @@ pub struct FunctionLiteral {
 
     /// The `body` field is the body of the function literal.
     pub body: BlockStatement,
+}
+
+impl Node for FunctionLiteral {
+    fn token_literal(&self) -> String {
+        self.token.literal.clone()
+    }
 }
 
 /// The `PrefixExpression` struct represents a prefix expression in the Monkey language. For example,
@@ -184,6 +194,7 @@ impl Display for Expression {
             Self::Identifier(identifier) => write!(f, "{}", identifier),
             Self::IntegerLiteral(integer) => write!(f, "{}", integer),
             Self::BooleanLiteral(boolean) => write!(f, "{}", boolean),
+            Self::FunctionLiteral(function) => write!(f, "{}", function),
             Self::Prefix(prefix) => write!(f, "{}", prefix),
             Self::Infix(infix) => write!(f, "{}", infix),
             Self::If(if_expression) => write!(f, "{}", if_expression),
@@ -206,6 +217,23 @@ impl Display for IntegerLiteral {
 impl Display for BooleanLiteral {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.value)
+    }
+}
+
+impl Display for FunctionLiteral {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.token_literal())?;
+        write!(
+            f,
+            "({})",
+            self.parameters
+                .iter()
+                .map(Identifier::to_string)
+                .collect::<Vec<_>>()
+                .join(", ")
+        )?;
+        write!(f, " ")?;
+        write!(f, "{}", self.body)
     }
 }
 
