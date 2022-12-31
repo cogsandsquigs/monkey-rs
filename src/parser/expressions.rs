@@ -212,6 +212,12 @@ impl Parser {
             alternative,
         }))
     }
+
+    /// Parses a function literal from the input. e.g. `fn(x, y) { x + y; }`. Expects the current token to be a `fn` keyword
+    /// (TokenKind::Fn).
+    fn parse_function(&mut self) -> Result<Expression, ()> {
+        todo!()
+    }
 }
 
 /// Private, not-necessarily-parsing functions. However, they are integral to the parsing process.
@@ -247,6 +253,7 @@ impl Parser {
         self.register_prefix(TokenType::Minus, Parser::parse_prefix);
         self.register_prefix(TokenType::LParen, Parser::parse_grouped);
         self.register_prefix(TokenType::If, Parser::parse_if);
+        self.register_prefix(TokenType::Function, Parser::parse_function);
 
         // Registering infix tokens.
         self.register_infix(TokenType::Plus, Self::parse_infix);
