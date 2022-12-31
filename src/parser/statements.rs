@@ -1,7 +1,7 @@
 use super::{precedence::Precedence, Parser};
 use crate::{
     ast::{
-        expressions::Identifier,
+        expressions::{BlockStatement, Identifier},
         statements::{ExpressionStatement, LetStatement, ReturnStatement, Statement},
     },
     token::TokenType,
@@ -76,6 +76,8 @@ impl Parser {
         })
     }
 
+    /// The `parse_expression_statement` method parses an expression statement from the input. Expects
+    /// the current token to be an expression, starting with a literal value or identifier.
     fn parse_expression_statement(&mut self) -> Result<ExpressionStatement, ()> {
         let token = self.current_token.clone();
         let expression = self.parse_expression(Precedence::Lowest)?;
@@ -87,5 +89,23 @@ impl Parser {
         }
 
         Ok(ExpressionStatement { token, expression })
+    }
+
+    /// The `parse_block_statement` method parses a block statement from the input. Expects the
+    /// current token to be a `TokenType::LBrace`.
+    pub(crate) fn parse_block_statement(&mut self) -> Result<BlockStatement, ()> {
+        let token = self.current_token.clone();
+        let mut statements = Vec::new();
+
+        self.next_token();
+
+        // We end parsing if we reach the end of the file or a closing brace.
+        while !self.cur_token_is(TokenType::RBrace) && !self.cur_token_is(TokenType::EOF) {
+            let statement = self.parse_statement()?;
+            statements.push(statement);
+            self.next_token();
+        }
+
+        Ok(BlockStatement { token, statements })
     }
 }

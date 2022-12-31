@@ -5,7 +5,7 @@ use super::{
 };
 use crate::{
     ast::expressions::{
-        Boolean, Expression, Identifier, InfixExpression, Integer, PrefixExpression,
+        Boolean, Expression, Identifier, IfExpression, InfixExpression, Integer, PrefixExpression,
     },
     token::TokenType,
 };
@@ -19,6 +19,7 @@ pub(crate) type InfixParseFn = fn(&mut Parser, Expression) -> Result<Expression,
 impl Parser {
     /// Parses an expression from the input, using the Pratt Parsing technique.
     /// See: https://en.wikipedia.org/wiki/Pratt_parser
+    /// Expects the current token to be the first token of the expression, i.e. a literal value/grouped expression/identifier.
     pub(crate) fn parse_expression(&mut self, precedence: Precedence) -> Result<Expression, ()> {
         let Some(prefix) = self.prefix_parse_fns.get(&self.current_token.r#type) else {
             self.errors.push(Error::new(
@@ -65,7 +66,7 @@ impl Parser {
         Ok(left)
     }
 
-    /// Parses an identifier from the input.
+    /// Parses an identifier from the input. Expects the current token to be an identifier.
     fn parse_identifier(&mut self) -> Result<Expression, ()> {
         Ok(Expression::Identifier(Identifier {
             token: self.current_token.clone(),
@@ -73,7 +74,7 @@ impl Parser {
         }))
     }
 
-    /// Parses an integer from the input.
+    /// Parses an integer from the input. Expects the current token to be an integer.
     fn parse_integer(&mut self) -> Result<Expression, ()> {
         let token = self.current_token.clone();
 
@@ -92,7 +93,7 @@ impl Parser {
         Ok(Expression::Integer(Integer { token, value }))
     }
 
-    /// Parses a boolean from the input.
+    /// Parses a boolean from the input. Expects the current token to be a boolean.
     fn parse_boolean(&mut self) -> Result<Expression, ()> {
         Ok(Expression::Boolean(Boolean {
             token: self.current_token.clone(),
@@ -100,7 +101,7 @@ impl Parser {
         }))
     }
 
-    /// Parses a prefix expression from the input. e.g. `!5` or `-15`.
+    /// Parses a prefix expression from the input. e.g. `!5` or `-15`. Expects the current token to be a prefix operator.
     fn parse_prefix(&mut self) -> Result<Expression, ()> {
         let token = self.current_token.clone();
         let operator = token.literal.clone();
@@ -119,17 +120,7 @@ impl Parser {
         }))
     }
 
-    /// Peeks at the next token's precedence value.
-    fn peek_precedence(&self) -> Precedence {
-        precedence_of(&self.peek_token.r#type)
-    }
-
-    /// Returns the current token's precedence value.
-    fn current_precedence(&self) -> Precedence {
-        precedence_of(&self.current_token.r#type)
-    }
-
-    /// Parses an infix expression from the input. e.g. `5 + 5` or `5 * 5`.
+    /// Parses an infix expression from the input. e.g. `5 + 5` or `5 * 5`. Expects the current token to be an infix operator.
     fn parse_infix(&mut self, left: Expression) -> Result<Expression, ()> {
         let token = self.current_token.clone();
         let operator = token.literal.clone();
@@ -152,7 +143,7 @@ impl Parser {
         }))
     }
 
-    /// Parses a grouped expression from the input. e.g. `(5 + 5)`.
+    /// Parses a grouped expression from the input. e.g. `(5 + 5)`. Expects the current token to be a left parenthesis.
     fn parse_grouped(&mut self) -> Result<Expression, ()> {
         // Advance to the next token so we can parse the expression inside the parentheses.
         self.next_token();
@@ -166,6 +157,56 @@ impl Parser {
         }
 
         Ok(expr)
+    }
+
+    /// Parses an if expression from the input. e.g. `if (x < y) { x }`. Expects the current token to be an `if` keyword
+    /// (TokenKind::If).
+    fn parse_if(&mut self) -> Result<Expression, ()> {
+        let token = self.current_token.clone();
+
+        // If the next token isn't a left parenthesis, we have an error.
+        if !self.expect_peek(TokenType::LParen) {
+            return Err(());
+        }
+
+        // Advance to the next token so we can parse the condition expression.
+        self.next_token();
+
+        // Parse the condition expression.
+        let condition = self.parse_expression(Precedence::Lowest)?;
+
+        // If the next token isn't a right parenthesis, we have an error.
+        if !self.expect_peek(TokenType::RParen) {
+            return Err(());
+        }
+
+        // If the next token isn't a left brace, we have an error.
+        if !self.expect_peek(TokenType::LBrace) {
+            return Err(());
+        }
+
+        // Parse the consequence block.
+        let consequence = self.parse_block_statement()?;
+
+        Ok(Expression::If(IfExpression {
+            token,
+            condition: Box::new(condition),
+            consequence,
+            alternative: None,
+        }))
+    }
+}
+
+/// Private, not-necessarily-parsing functions. However, they are integral to the parsing process.
+impl Parser {
+    /// Peeks at the next token's precedence value.
+    fn peek_precedence(&self) -> Precedence {
+        precedence_of(&self.peek_token.r#type)
+    }
+
+    /// Returns the current token's precedence value.
+    fn current_precedence(&self) -> Precedence {
+        precedence_of(&self.current_token.r#type)
     }
 
     /// Regesters a prefix function for a given token type.
@@ -188,6 +229,7 @@ impl Parser {
         self.register_prefix(TokenType::Bang, Parser::parse_prefix);
         self.register_prefix(TokenType::Minus, Parser::parse_prefix);
         self.register_prefix(TokenType::LParen, Parser::parse_grouped);
+        self.register_prefix(TokenType::If, Parser::parse_if);
 
         // Registering infix tokens.
         self.register_infix(TokenType::Plus, Self::parse_infix);
