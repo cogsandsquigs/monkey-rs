@@ -15,13 +15,13 @@ pub enum Expression {
     Identifier(Identifier),
 
     /// The `IntegerLiteral` struct represents an integer literal in the Monkey language.
-    IntegerLiteral(IntegerLiteral),
+    Integer(IntegerLiteral),
 
     /// The `BooleanLiteral` struct represents a boolean literal in the Monkey language.
-    BooleanLiteral(BooleanLiteral),
+    Boolean(BooleanLiteral),
 
     /// The `FunctionLiteral` struct represents a function literal in the Monkey language.
-    FunctionLiteral(FunctionLiteral),
+    Function(FunctionLiteral),
 
     /// The `Prefix` struct represents a prefix expression in the Monkey language.
     Prefix(PrefixExpression),
@@ -37,9 +37,9 @@ impl Node for Expression {
     fn token_literal(&self) -> String {
         match self {
             Self::Identifier(identifier) => identifier.token_literal(),
-            Self::IntegerLiteral(integer) => integer.token_literal(),
-            Self::BooleanLiteral(boolean) => boolean.token_literal(),
-            Self::FunctionLiteral(function) => function.token_literal(),
+            Self::Integer(integer) => integer.token_literal(),
+            Self::Boolean(boolean) => boolean.token_literal(),
+            Self::Function(function) => function.token_literal(),
             Self::Prefix(prefix) => prefix.token_literal(),
             Self::Infix(infix) => infix.token_literal(),
             Self::If(if_expression) => if_expression.token_literal(),
@@ -192,9 +192,9 @@ impl Display for Expression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::Identifier(identifier) => write!(f, "{}", identifier),
-            Self::IntegerLiteral(integer) => write!(f, "{}", integer),
-            Self::BooleanLiteral(boolean) => write!(f, "{}", boolean),
-            Self::FunctionLiteral(function) => write!(f, "{}", function),
+            Self::Integer(integer) => write!(f, "{}", integer),
+            Self::Boolean(boolean) => write!(f, "{}", boolean),
+            Self::Function(function) => write!(f, "{}", function),
             Self::Prefix(prefix) => write!(f, "{}", prefix),
             Self::Infix(infix) => write!(f, "{}", infix),
             Self::If(if_expression) => write!(f, "{}", if_expression),

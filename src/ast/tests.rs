@@ -11,7 +11,7 @@ use super::{
 #[test]
 fn test_formatting() {
     let ast = Program {
-        statements: vec![Statement::LetStatement(LetStatement {
+        statements: vec![Statement::Let(LetStatement {
             token: Token {
                 r#type: TokenType::Let,
                 literal: "let".to_string(),

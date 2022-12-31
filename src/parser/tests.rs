@@ -9,7 +9,7 @@ use std::any::Any;
 
 /// Helper function to test an `IntegerLiteral` expression.
 fn test_integer(expr: &Expression, value: i64) {
-    if let Expression::IntegerLiteral(int) = expr {
+    if let Expression::Integer(int) = expr {
         assert_eq!(int.value, value);
         assert_eq!(int.token_literal(), value.to_string());
     } else {
@@ -22,7 +22,7 @@ fn test_integer(expr: &Expression, value: i64) {
 
 /// Helper function to test a `BooleanLiteral` expression.
 fn test_boolean(expr: &Expression, value: bool) {
-    if let Expression::BooleanLiteral(b) = expr {
+    if let Expression::Boolean(b) = expr {
         assert_eq!(b.value, value);
         assert_eq!(b.token_literal(), value.to_string());
     } else {
@@ -96,7 +96,7 @@ fn test_let_statements() {
             program.statements.len()
         );
 
-        let Statement::LetStatement(stmt) = &program.statements[0] else {
+        let Statement::Let(stmt) = &program.statements[0] else {
             panic!(
                 "Statement is not a LetStatement statement, got {}",
                 program.statements[0].token_literal()
@@ -132,7 +132,7 @@ fn test_return_statements() {
             program.statements.len()
         );
 
-        let Statement::ReturnStatement(stmt) = &program.statements[0] else {
+        let Statement::Return(stmt) = &program.statements[0] else {
             panic!(
                 "Statement is not a ReturnStatement statement, got {}",
                 program.statements[0].token_literal()
@@ -162,7 +162,7 @@ fn test_identifier_expression() {
         program.statements.len()
     );
 
-    let Statement::ExpressionStatement(stmt) = &program.statements[0] else {
+    let Statement::Expression(stmt) = &program.statements[0] else {
         panic!(
             "Statement is not an ExpressionStatement statement, got {}",
             program.statements[0].token_literal()
@@ -191,7 +191,7 @@ fn test_integer_expression() {
         program.statements.len()
     );
 
-    let Statement::ExpressionStatement(stmt) = &program.statements[0] else {
+    let Statement::Expression(stmt) = &program.statements[0] else {
         panic!(
             "Statement is not an ExpressionStatement statement, got {}",
             program.statements[0].token_literal()
@@ -221,7 +221,7 @@ false;";
     );
 
     for (i, expected) in vec![true, false].iter().enumerate() {
-        let Statement::ExpressionStatement(stmt) = &program.statements[i] else {
+        let Statement::Expression(stmt) = &program.statements[i] else {
             panic!(
                 "Statement is not an ExpressionStatement statement, got {}",
                 program.statements[i].token_literal()
@@ -254,7 +254,7 @@ fn test_prefix_expressions() {
             program.statements.len()
         );
 
-        let Statement::ExpressionStatement(stmt) = &program.statements[0] else {
+        let Statement::Expression(stmt) = &program.statements[0] else {
             panic!(
                 "Statement is not an ExpressionStatement statement, got {}",
                 program.statements[0].token_literal()
@@ -308,7 +308,7 @@ fn test_infix_expressions() {
             program.statements.len()
         );
 
-        let Statement::ExpressionStatement(stmt) = &program.statements[0] else {
+        let Statement::Expression(stmt) = &program.statements[0] else {
             panic!(
                 "Statement is not an ExpressionStatement statement, got {}",
                 program.statements[0].token_literal()
@@ -392,7 +392,7 @@ fn test_if_expressions() {
         program.statements.len()
     );
 
-    let Statement::ExpressionStatement(stmt) = &program.statements[0] else {
+    let Statement::Expression(stmt) = &program.statements[0] else {
         panic!(
             "Statement is not an ExpressionStatement statement, got {}",
             program.statements[0].token_literal()
@@ -415,7 +415,7 @@ fn test_if_expressions() {
         if_expr.consequence.statements.len()
     );
 
-    let Statement::ExpressionStatement(consequence) = &if_expr.consequence.statements[0] else {
+    let Statement::Expression(consequence) = &if_expr.consequence.statements[0] else {
         panic!(
             "Statement is not an ExpressionStatement statement, got {}",
             if_expr.consequence.statements[0].token_literal()
@@ -443,7 +443,7 @@ fn test_if_else_expressions() {
         program.statements.len()
     );
 
-    let Statement::ExpressionStatement(stmt) = &program.statements[0] else {
+    let Statement::Expression(stmt) = &program.statements[0] else {
         panic!(
             "Statement is not an ExpressionStatement statement, got {}",
             program.statements[0].token_literal()
@@ -466,7 +466,7 @@ fn test_if_else_expressions() {
         if_expr.consequence.statements.len()
     );
 
-    let Statement::ExpressionStatement(consequence) = &if_expr.consequence.statements[0] else {
+    let Statement::Expression(consequence) = &if_expr.consequence.statements[0] else {
         panic!(
             "Statement is not an ExpressionStatement statement, got {}",
             if_expr.consequence.statements[0].token_literal()
@@ -477,7 +477,7 @@ fn test_if_else_expressions() {
 
     assert!(if_expr.alternative.is_some());
 
-    let Statement::ExpressionStatement(alternative) = if_expr.alternative.as_ref().unwrap().statements[0].clone() else {
+    let Statement::Expression(alternative) = if_expr.alternative.as_ref().unwrap().statements[0].clone() else {
         panic!(
             "Statement is not an ExpressionStatement statement, got {}",
             if_expr.alternative.as_ref().unwrap().statements[0].token_literal()
@@ -503,14 +503,14 @@ fn test_function_literals() {
         program.statements.len()
     );
 
-    let Statement::ExpressionStatement(stmt) = &program.statements[0] else {
+    let Statement::Expression(stmt) = &program.statements[0] else {
         panic!(
             "Statement is not an ExpressionStatement statement, got {}",
             program.statements[0].token_literal()
         );
     };
 
-    let Expression::FunctionLiteral(function) = &stmt.expression else {
+    let Expression::Function(function) = &stmt.expression else {
         panic!(
             "Expression is not a FunctionLiteral expression, got {}",
             stmt.expression.token_literal()
@@ -530,7 +530,7 @@ fn test_function_literals() {
         function.body.statements.len()
     );
 
-    let Statement::ExpressionStatement(body) = &function.body.statements[0] else {
+    let Statement::Expression(body) = &function.body.statements[0] else {
         panic!(
             "Statement is not an ExpressionStatement statement, got {}",
             function.body.statements[0].token_literal()

@@ -1,27 +1,27 @@
 use super::{
     errors::Error,
     precedence::{precedence_of, Precedence},
-    Parser,
+    ParseResult, Parser,
 };
 use crate::{
     ast::expressions::{
-        BooleanLiteral, Expression, Identifier, IfExpression, InfixExpression, IntegerLiteral,
-        PrefixExpression,
+        BooleanLiteral, Expression, FunctionLiteral, Identifier, IfExpression, InfixExpression,
+        IntegerLiteral, PrefixExpression,
     },
     token::TokenType,
 };
 
 /// Describes a prefix parse function, which parses an operator that comes before a literal value/grouped expression.
-pub(crate) type PrefixParseFn = fn(&mut Parser) -> Result<Expression, ()>;
+pub(crate) type PrefixParseFn = fn(&mut Parser) -> ParseResult<Expression>;
 
 /// Describes an infix parse function, which parses an operator that is in between some literal values/grouped expressions.
-pub(crate) type InfixParseFn = fn(&mut Parser, Expression) -> Result<Expression, ()>;
+pub(crate) type InfixParseFn = fn(&mut Parser, Expression) -> ParseResult<Expression>;
 
 impl Parser {
     /// Parses an expression from the input, using the Pratt Parsing technique.
     /// See: https://en.wikipedia.org/wiki/Pratt_parser
     /// Expects the current token to be the first token of the expression, i.e. a literal value/grouped expression/identifier.
-    pub(crate) fn parse_expression(&mut self, precedence: Precedence) -> Result<Expression, ()> {
+    pub(crate) fn parse_expression(&mut self, precedence: Precedence) -> ParseResult<Expression> {
         let Some(prefix) = self.prefix_parse_fns.get(&self.current_token.r#type) else {
             self.errors.push(Error::new(
                 format!("no prefix parse function for {} found", self.current_token.r#type),
@@ -68,7 +68,7 @@ impl Parser {
     }
 
     /// Parses an identifier from the input. Expects the current token to be an identifier.
-    fn parse_identifier(&mut self) -> Result<Expression, ()> {
+    fn parse_identifier(&mut self) -> ParseResult<Expression> {
         Ok(Expression::Identifier(Identifier {
             token: self.current_token.clone(),
             value: self.current_token.literal.clone(),
@@ -76,7 +76,7 @@ impl Parser {
     }
 
     /// Parses an integer from the input. Expects the current token to be an integer.
-    fn parse_integer(&mut self) -> Result<Expression, ()> {
+    fn parse_integer(&mut self) -> ParseResult<Expression> {
         let token = self.current_token.clone();
 
         let value = match token.literal.parse::<i64>() {
@@ -91,19 +91,19 @@ impl Parser {
             }
         };
 
-        Ok(Expression::IntegerLiteral(IntegerLiteral { token, value }))
+        Ok(Expression::Integer(IntegerLiteral { token, value }))
     }
 
     /// Parses a boolean from the input. Expects the current token to be a boolean.
-    fn parse_boolean(&mut self) -> Result<Expression, ()> {
-        Ok(Expression::BooleanLiteral(BooleanLiteral {
+    fn parse_boolean(&mut self) -> ParseResult<Expression> {
+        Ok(Expression::Boolean(BooleanLiteral {
             token: self.current_token.clone(),
             value: self.cur_token_is(TokenType::True),
         }))
     }
 
     /// Parses a prefix expression from the input. e.g. `!5` or `-15`. Expects the current token to be a prefix operator.
-    fn parse_prefix(&mut self) -> Result<Expression, ()> {
+    fn parse_prefix(&mut self) -> ParseResult<Expression> {
         let token = self.current_token.clone();
         let operator = token.literal.clone();
 
@@ -122,7 +122,7 @@ impl Parser {
     }
 
     /// Parses an infix expression from the input. e.g. `5 + 5` or `5 * 5`. Expects the current token to be an infix operator.
-    fn parse_infix(&mut self, left: Expression) -> Result<Expression, ()> {
+    fn parse_infix(&mut self, left: Expression) -> ParseResult<Expression> {
         let token = self.current_token.clone();
         let operator = token.literal.clone();
 
@@ -145,7 +145,7 @@ impl Parser {
     }
 
     /// Parses a grouped expression from the input. e.g. `(5 + 5)`. Expects the current token to be a left parenthesis.
-    fn parse_grouped(&mut self) -> Result<Expression, ()> {
+    fn parse_grouped(&mut self) -> ParseResult<Expression> {
         // Advance to the next token so we can parse the expression inside the parentheses.
         self.next_token();
 
@@ -162,7 +162,7 @@ impl Parser {
 
     /// Parses an if expression from the input. e.g. `if (x < y) { x }`. Expects the current token to be an `if` keyword
     /// (TokenKind::If).
-    fn parse_if(&mut self) -> Result<Expression, ()> {
+    fn parse_if(&mut self) -> ParseResult<Expression> {
         let token = self.current_token.clone();
 
         // If the next token isn't a left parenthesis, we have an error.
@@ -215,7 +215,35 @@ impl Parser {
 
     /// Parses a function literal from the input. e.g. `fn(x, y) { x + y; }`. Expects the current token to be a `fn` keyword
     /// (TokenKind::Fn).
-    fn parse_function(&mut self) -> Result<Expression, ()> {
+    fn parse_function(&mut self) -> ParseResult<Expression> {
+        let token = self.current_token.clone();
+
+        // If the next token isn't a left parenthesis, we have an error.
+        if !self.expect_peek(TokenType::LParen) {
+            return Err(());
+        }
+
+        // Parse the function's parameters.
+        let parameters = self.parse_function_parameters()?;
+
+        // If the next token isn't a left brace, we have an error.
+        if !self.expect_peek(TokenType::LBrace) {
+            return Err(());
+        }
+
+        // Parse the function's body.
+        let body = self.parse_block_statement()?;
+
+        Ok(Expression::Function(FunctionLiteral {
+            token,
+            parameters,
+            body,
+        }))
+    }
+
+    /// Parses a function literal's parameters from the input. e.g. `fn(x, y) { x + y; }`. Expects the current token to be a
+    /// left parenthesis (TokenKind::LParen).
+    fn parse_function_parameters(&mut self) -> ParseResult<Vec<Identifier>> {
         todo!()
     }
 }

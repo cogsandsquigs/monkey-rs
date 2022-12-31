@@ -1,4 +1,4 @@
-use super::{precedence::Precedence, Parser};
+use super::{precedence::Precedence, ParseResult, Parser};
 use crate::{
     ast::{
         expressions::Identifier,
@@ -12,20 +12,18 @@ use crate::{
 impl Parser {
     /// The `parse_statement` method parses a single statement from the input.
     /// TODO: This should return an actual error, not just `()`.
-    pub(crate) fn parse_statement(&mut self) -> Result<Statement, ()> {
+    pub(crate) fn parse_statement(&mut self) -> ParseResult<Statement> {
         match self.current_token.r#type {
-            TokenType::Let => Ok(Statement::LetStatement(self.parse_let_statement()?)),
-            TokenType::Return => Ok(Statement::ReturnStatement(self.parse_return_statement()?)),
-            _ => Ok(Statement::ExpressionStatement(
-                self.parse_expression_statement()?,
-            )),
+            TokenType::Let => Ok(Statement::Let(self.parse_let_statement()?)),
+            TokenType::Return => Ok(Statement::Return(self.parse_return_statement()?)),
+            _ => Ok(Statement::Expression(self.parse_expression_statement()?)),
         }
     }
 
     /// The `parse_let_statement` method parses a `let` statement from the input. Expects the current
     /// token to be a `TokenType::Let`.
     /// TODO: This should return an actual error, not just `()`.
-    fn parse_let_statement(&mut self) -> Result<LetStatement, ()> {
+    fn parse_let_statement(&mut self) -> ParseResult<LetStatement> {
         let token = self.current_token.clone();
 
         if !self.expect_peek(TokenType::Ident) {
@@ -61,7 +59,7 @@ impl Parser {
 
     /// The `parse_return_statement` method parses a `return` statement from the input. Expects the
     /// current token to be a `TokenType::Return`.
-    fn parse_return_statement(&mut self) -> Result<ReturnStatement, ()> {
+    fn parse_return_statement(&mut self) -> ParseResult<ReturnStatement> {
         let token = self.current_token.clone();
 
         self.next_token();
@@ -80,7 +78,7 @@ impl Parser {
 
     /// The `parse_expression_statement` method parses an expression statement from the input. Expects
     /// the current token to be an expression, starting with a literal value or identifier.
-    fn parse_expression_statement(&mut self) -> Result<ExpressionStatement, ()> {
+    fn parse_expression_statement(&mut self) -> ParseResult<ExpressionStatement> {
         let token = self.current_token.clone();
         let expression = self.parse_expression(Precedence::Lowest)?;
 
@@ -95,7 +93,7 @@ impl Parser {
 
     /// The `parse_block_statement` method parses a block statement from the input. Expects the
     /// current token to be a `TokenType::LBrace`.
-    pub(crate) fn parse_block_statement(&mut self) -> Result<BlockStatement, ()> {
+    pub(crate) fn parse_block_statement(&mut self) -> ParseResult<BlockStatement> {
         let token = self.current_token.clone();
         let mut statements = Vec::new();
 

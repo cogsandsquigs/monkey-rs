@@ -13,21 +13,21 @@ use crate::token::Token;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Statement {
     /// The `LetStatement` struct represents a `let` statement in the Monkey language.
-    LetStatement(LetStatement),
+    Let(LetStatement),
 
     /// The `ReturnStatement` struct represents a `return` statement in the Monkey language.
-    ReturnStatement(ReturnStatement),
+    Return(ReturnStatement),
 
     /// The `ExpressionStatement` struct represents an expression statement in the Monkey language.
-    ExpressionStatement(ExpressionStatement),
+    Expression(ExpressionStatement),
 }
 
 impl Node for Statement {
     fn token_literal(&self) -> String {
         match self {
-            Self::LetStatement(let_statement) => let_statement.token_literal(),
-            Self::ReturnStatement(return_statement) => return_statement.token_literal(),
-            Self::ExpressionStatement(expression_statement) => expression_statement.token_literal(),
+            Self::Let(let_statement) => let_statement.token_literal(),
+            Self::Return(return_statement) => return_statement.token_literal(),
+            Self::Expression(expression_statement) => expression_statement.token_literal(),
         }
     }
 }
@@ -121,9 +121,9 @@ impl Display for BlockStatement {
 impl Display for Statement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::LetStatement(let_statement) => write!(f, "{}", let_statement),
-            Self::ReturnStatement(return_statement) => write!(f, "{}", return_statement),
-            Self::ExpressionStatement(expression_statement) => {
+            Self::Let(let_statement) => write!(f, "{}", let_statement),
+            Self::Return(return_statement) => write!(f, "{}", return_statement),
+            Self::Expression(expression_statement) => {
                 write!(f, "{}", expression_statement)
             }
         }
