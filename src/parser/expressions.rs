@@ -5,8 +5,8 @@ use super::{
 };
 use crate::{
     ast::expressions::{
-        BooleanLiteral, Expression, FunctionLiteral, Identifier, IfExpression, InfixExpression,
-        IntegerLiteral, PrefixExpression,
+        BooleanLiteral, CallExpression, Expression, FunctionLiteral, Identifier, IfExpression,
+        InfixExpression, IntegerLiteral, PrefixExpression,
     },
     token::TokenType,
 };
@@ -291,6 +291,61 @@ impl Parser {
 
         Ok(identifiers)
     }
+
+    /// Parses a call expression from the input. e.g. `add(1, 2)`. Expects the current token to be a left-parenthesis.
+    fn parse_call(&mut self, function: Expression) -> ParseResult<Expression> {
+        let token = self.current_token.clone();
+
+        // Parse the function's arguments.
+        let arguments = self.parse_call_arguments()?;
+
+        Ok(Expression::Call(CallExpression {
+            token,
+            function: Box::new(function),
+            arguments,
+        }))
+    }
+
+    /// Parses a call expression's arguments from the input. e.g. `add(1, 2)`. Expects the current token to be a left
+    /// parenthesis (TokenKind::LParen).
+    fn parse_call_arguments(&mut self) -> ParseResult<Vec<Expression>> {
+        let mut arguments: Vec<Expression> = Vec::new();
+
+        // If the next token is a right parenthesis, we have no arguments.
+        if self.peek_token_is(TokenType::RParen) {
+            self.next_token();
+            return Ok(arguments);
+        }
+
+        // Advance to the next token so we can parse the first argument.
+        self.next_token();
+
+        // Parse the first argument.
+        arguments.push(self.parse_expression(Precedence::Lowest)?);
+
+        // Parse the rest of the arguments.
+        // While the next token is a comma, we have more arguments that we need
+        // to parse.
+        while self.peek_token_is(TokenType::Comma) {
+            // Advance to the next token, which is a comma. The next line skips the comma
+            // so we can parse the next argument.
+            self.next_token();
+
+            // Advance to the next token so we skip the comma, making the current
+            // token the argument.
+            self.next_token();
+
+            // Parse the next argument.
+            arguments.push(self.parse_expression(Precedence::Lowest)?);
+        }
+
+        // If the next token isn't a right parenthesis, we have an error.
+        if !self.expect_peek(TokenType::RParen) {
+            return Err(());
+        }
+
+        Ok(arguments)
+    }
 }
 
 /// Private, not-necessarily-parsing functions. However, they are integral to the parsing process.
@@ -337,5 +392,6 @@ impl Parser {
         self.register_infix(TokenType::NotEq, Self::parse_infix);
         self.register_infix(TokenType::Lt, Self::parse_infix);
         self.register_infix(TokenType::Gt, Self::parse_infix);
+        self.register_infix(TokenType::LParen, Self::parse_call);
     }
 }

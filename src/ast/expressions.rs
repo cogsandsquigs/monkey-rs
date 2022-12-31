@@ -31,6 +31,9 @@ pub enum Expression {
 
     /// The `If` struct represents an `if` expression in the Monkey language.
     If(IfExpression),
+
+    /// The `Call` struct represents a function call in the Monkey language.
+    Call(CallExpression),
 }
 
 impl Node for Expression {
@@ -43,6 +46,7 @@ impl Node for Expression {
             Self::Prefix(prefix) => prefix.token_literal(),
             Self::Infix(infix) => infix.token_literal(),
             Self::If(if_expression) => if_expression.token_literal(),
+            Self::Call(call) => call.token_literal(),
         }
     }
 }
@@ -188,6 +192,29 @@ impl Node for IfExpression {
     }
 }
 
+/// The `CallExpression` struct represents a function call in the Monkey language. For example, the
+/// expression `add(1, 2 * 3, 4 + 5)` is a function call with the function being the identifier
+/// `add` and the arguments being the integer literal `1`, the infix expression `2 * 3`, and the
+/// infix expression `4 + 5`.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct CallExpression {
+    /// The `token` field is the token that the function call represents.
+    pub token: Token,
+
+    /// The `function` field is the name of the function call. This can only be
+    /// an identifier or an expression that evaluates to a function.
+    pub function: Box<Expression>,
+
+    /// The `arguments` field is the arguments of the function call.
+    pub arguments: Vec<Expression>,
+}
+
+impl Node for CallExpression {
+    fn token_literal(&self) -> String {
+        self.token.literal.clone()
+    }
+}
+
 impl Display for Expression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
@@ -198,6 +225,7 @@ impl Display for Expression {
             Self::Prefix(prefix) => write!(f, "{}", prefix),
             Self::Infix(infix) => write!(f, "{}", infix),
             Self::If(if_expression) => write!(f, "{}", if_expression),
+            Self::Call(call) => write!(f, "{}", call),
         }
     }
 }
@@ -256,5 +284,21 @@ impl Display for IfExpression {
             write!(f, " else {}", alternative)?;
         }
         Ok(())
+    }
+}
+
+impl Display for CallExpression {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}(", self.function)?;
+        write!(
+            f,
+            "{}",
+            self.arguments
+                .iter()
+                .map(Expression::to_string)
+                .collect::<Vec<_>>()
+                .join(", ")
+        )?;
+        write!(f, ")")
     }
 }

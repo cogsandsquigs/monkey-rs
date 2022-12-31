@@ -347,15 +347,15 @@ fn test_operator_precedence_parsing() {
         ("2 / (5 + 5)", "(2 / (5 + 5))"),
         ("-(5 + 5)", "(-(5 + 5))"),
         ("!(true == true)", "(!(true == true))"),
-        // ("a + add(b * c) + d", "((a + add((b * c))) + d)"),
-        // (
-        //     "add(a, b, 1, 2 * 3, 4 + 5, add(6, 7 * 8))",
-        //     "add(a, b, 1, (2 * 3), (4 + 5), add(6, (7 * 8)))",
-        // ),
-        // (
-        //     "add(a + b + c * d / f + g)",
-        //     "add((((a + b) + ((c * d) / f)) + g))",
-        // ),
+        ("a + add(b * c) + d", "((a + add((b * c))) + d)"),
+        (
+            "add(a, b, 1, 2 * 3, 4 + 5, add(6, 7 * 8))",
+            "add(a, b, 1, (2 * 3), (4 + 5), add(6, (7 * 8)))",
+        ),
+        (
+            "add(a + b + c * d / f + g)",
+            "add((((a + b) + ((c * d) / f)) + g))",
+        ),
         // (
         //     "a * [1, 2, 3, 4][b * c] * d",
         //     "((a * ([1, 2, 3, 4][(b * c)])) * d)",
@@ -366,13 +366,13 @@ fn test_operator_precedence_parsing() {
         // ),
     ];
 
-    for (input, expected) in tests {
+    for (i, (input, expected)) in tests.into_iter().enumerate() {
         let lexer = Lexer::new(input);
         let mut parser = Parser::new(lexer);
 
         let program = parser.parse_program().unwrap();
 
-        assert_eq!(program.to_string(), expected);
+        assert_eq!(program.to_string(), expected, "Test {} failed", i);
     }
 }
 
@@ -582,4 +582,45 @@ fn test_function_parameter_parsing() {
             assert_eq!(function.parameters[i].token_literal(), *ident);
         }
     }
+}
+
+/// Tests the parsing of call expressions.
+#[test]
+fn test_call_expressions() {
+    let input = "add(1, 2 * 3, 4 + 5);";
+    let lexer = Lexer::new(input);
+    let mut parser = Parser::new(lexer);
+
+    let program = parser.parse_program().unwrap();
+
+    assert_eq!(
+        program.statements.len(),
+        1,
+        "Expected 1 statement, but got {} statements",
+        program.statements.len()
+    );
+
+    let Statement::Expression(stmt) = &program.statements[0] else {
+        panic!(
+            "Statement is not an ExpressionStatement statement, got {}",
+            program.statements[0].token_literal()
+        );
+    };
+
+    let Expression::Call(call) = &stmt.expression else {
+        panic!(
+            "Expression is not a CallExpression expression, got {}",
+            stmt.expression.token_literal()
+        );
+    };
+
+    test_identifier(&call.function, "add");
+
+    assert_eq!(call.arguments.len(), 3);
+
+    test_integer(&call.arguments[0], 1);
+
+    test_infix(&call.arguments[1], &2, "*", &3);
+
+    test_infix(&call.arguments[2], &4, "+", &5);
 }

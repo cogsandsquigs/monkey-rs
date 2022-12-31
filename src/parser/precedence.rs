@@ -21,6 +21,7 @@ pub fn precedence_of(token_type: &TokenType) -> Precedence {
         TokenType::Minus => Precedence::Sum,
         TokenType::Slash => Precedence::Product,
         TokenType::Star => Precedence::Product,
+        TokenType::LParen => Precedence::Call,
         _ => Precedence::Lowest,
     }
 }
