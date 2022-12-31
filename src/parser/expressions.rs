@@ -244,7 +244,52 @@ impl Parser {
     /// Parses a function literal's parameters from the input. e.g. `fn(x, y) { x + y; }`. Expects the current token to be a
     /// left parenthesis (TokenKind::LParen).
     fn parse_function_parameters(&mut self) -> ParseResult<Vec<Identifier>> {
-        todo!()
+        let mut identifiers: Vec<Identifier> = Vec::new();
+
+        // If the next token is a right parenthesis, we have no parameters.
+        if self.peek_token_is(TokenType::RParen) {
+            self.next_token();
+            return Ok(identifiers);
+        }
+
+        // Advance to the next token so we can parse the first parameter.
+        self.next_token();
+
+        // Parse the first parameter.
+        let Expression::Identifier(identifier) = self.parse_identifier()? else {
+            // TODO: Error handling.
+            return Err(());
+        };
+
+        identifiers.push(identifier);
+
+        // Parse the rest of the parameters.
+        // While the next token is a comma, we have more parameters that we need
+        // to parse.
+        while self.peek_token_is(TokenType::Comma) {
+            // Advance to the next token, which is a comma. The next line skips the comma
+            // so we can parse the next parameter.
+            self.next_token();
+
+            // Advance to the next token so we skip the comma, making the current
+            // token the parameter.
+            self.next_token();
+
+            // Parse the next parameter.
+            let Expression::Identifier(identifier) = self.parse_identifier()? else {
+                // TODO: Error handling.
+                return Err(());
+            };
+
+            identifiers.push(identifier);
+        }
+
+        // If the next token isn't a right parenthesis, we have an error.
+        if !self.expect_peek(TokenType::RParen) {
+            return Err(());
+        }
+
+        Ok(identifiers)
     }
 }
 

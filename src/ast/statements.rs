@@ -44,7 +44,6 @@ pub struct LetStatement {
     pub name: Identifier,
 
     /// The `value` field is the expression that is being assigned to the identifier.
-    /// TODO: Get rid of the `Option` here, only necessary b/c we aren't parsing expressions yet.
     pub value: Box<Expression>,
 }
 
@@ -63,7 +62,6 @@ pub struct ReturnStatement {
     pub token: Token,
 
     /// The `value` field is the expression that is being returned.
-    /// TODO: Get rid of the `Option` here, only necessary b/c we aren't parsing expressions yet.
     pub return_value: Box<Expression>,
 }
 

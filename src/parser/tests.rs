@@ -539,3 +539,47 @@ fn test_function_literals() {
 
     test_infix(&body.expression, &"x", "+", &"y");
 }
+
+/// Tests the parsing of function parameters.
+#[test]
+fn test_function_parameter_parsing() {
+    let tests = vec![
+        ("fn() {};", vec![]),
+        ("fn(x) {};", vec!["x"]),
+        ("fn(x, y, z) {};", vec!["x", "y", "z"]),
+    ];
+
+    for (input, expected) in tests {
+        let lexer = Lexer::new(input);
+        let mut parser = Parser::new(lexer);
+
+        let program = parser.parse_program().unwrap();
+
+        assert_eq!(
+            program.statements.len(),
+            1,
+            "Expected 1 statement, but got {} statements",
+            program.statements.len()
+        );
+
+        let Statement::Expression(stmt) = &program.statements[0] else {
+            panic!(
+                "Statement is not an ExpressionStatement statement, got {}",
+                program.statements[0].token_literal()
+            );
+        };
+
+        let Expression::Function(function) = &stmt.expression else {
+            panic!(
+                "Expression is not a FunctionLiteral expression, got {}",
+                stmt.expression.token_literal()
+            );
+        };
+
+        assert_eq!(function.parameters.len(), expected.len());
+
+        for (i, ident) in expected.iter().enumerate() {
+            assert_eq!(function.parameters[i].token_literal(), *ident);
+        }
+    }
+}
