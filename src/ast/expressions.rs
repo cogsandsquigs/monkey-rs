@@ -1,7 +1,6 @@
-use std::fmt::Display;
-
-use super::{statements::Statement, Node};
+use super::{statements::BlockStatement, Node};
 use crate::token::Token;
+use std::fmt::Display;
 
 /// An expression is a piece of code that evaluates to a value. For example, `5 + 5` is an expression
 /// that evaluates to the value `10`. Note that while the original implementation uses raw `struct`s,
@@ -15,13 +14,11 @@ pub enum Expression {
     /// The `Identifier` struct represents an identifier in the Monkey language.
     Identifier(Identifier),
 
-    /// The `Integer` struct represents an integer literal in the Monkey language. Note that in the
-    /// original implementation, this is called `IntegerLiteral`.
-    Integer(Integer),
+    /// The `IntegerLiteral` struct represents an integer literal in the Monkey language.
+    IntegerLiteral(IntegerLiteral),
 
-    /// The `Boolean` struct represents a boolean literal in the Monkey language. Note that in the
-    /// original implementation, this is called `BooleanLiteral`.
-    Boolean(Boolean),
+    /// The `BooleanLiteral` struct represents a boolean literal in the Monkey language.
+    BooleanLiteral(BooleanLiteral),
 
     /// The `Prefix` struct represents a prefix expression in the Monkey language.
     Prefix(PrefixExpression),
@@ -37,8 +34,8 @@ impl Node for Expression {
     fn token_literal(&self) -> String {
         match self {
             Self::Identifier(identifier) => identifier.token_literal(),
-            Self::Integer(integer) => integer.token_literal(),
-            Self::Boolean(boolean) => boolean.token_literal(),
+            Self::IntegerLiteral(integer) => integer.token_literal(),
+            Self::BooleanLiteral(boolean) => boolean.token_literal(),
             Self::Prefix(prefix) => prefix.token_literal(),
             Self::Infix(infix) => infix.token_literal(),
             Self::If(if_expression) => if_expression.token_literal(),
@@ -64,10 +61,9 @@ impl Node for Identifier {
     }
 }
 
-/// The `Integer` struct represents an integer literal in the Monkey language. Note that in the
-/// original implementation, this is called `IntegerLiteral`.
+/// The `IntegerLiteral` struct represents an integer literal in the Monkey language.
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Integer {
+pub struct IntegerLiteral {
     /// The `token` field is the token that the integer literal represents.
     pub token: Token,
 
@@ -75,16 +71,15 @@ pub struct Integer {
     pub value: i64,
 }
 
-impl Node for Integer {
+impl Node for IntegerLiteral {
     fn token_literal(&self) -> String {
         self.token.literal.clone()
     }
 }
 
-/// The `Boolean` struct represents a boolean literal in the Monkey language. Note that in the
-/// original implementation, this is called `BooleanLiteral`.
+/// The `BooleanLiteral` struct represents a boolean literal in the Monkey language.
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Boolean {
+pub struct BooleanLiteral {
     /// The `token` field is the token that the boolean literal represents.
     pub token: Token,
 
@@ -92,10 +87,25 @@ pub struct Boolean {
     pub value: bool,
 }
 
-impl Node for Boolean {
+impl Node for BooleanLiteral {
     fn token_literal(&self) -> String {
         self.token.literal.clone()
     }
+}
+
+/// The `FunctionLiteral` struct represents a function literal in the Monkey language. For example,
+/// the expression `fn(x, y) { x + y; }` is a function literal with the parameters `x` and `y` and
+/// the body being the expression `x + y`.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct FunctionLiteral {
+    /// The `token` field is the token that the function literal represents.
+    pub token: Token,
+
+    /// The `parameters` field is the parameters of the function literal.
+    pub parameters: Vec<Identifier>,
+
+    /// The `body` field is the body of the function literal.
+    pub body: BlockStatement,
 }
 
 /// The `PrefixExpression` struct represents a prefix expression in the Monkey language. For example,
@@ -168,30 +178,12 @@ impl Node for IfExpression {
     }
 }
 
-/// The `BlockStatement` struct represents a block statement in the Monkey language. For example, the
-/// block statement `{ x }` is a block statement with the `statements` field containing the
-/// expression statement `x`.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct BlockStatement {
-    /// The `token` field is the token that the block statement represents.
-    pub token: Token,
-
-    /// The `statements` field is the statements of the block statement.
-    pub statements: Vec<Statement>,
-}
-
-impl Node for BlockStatement {
-    fn token_literal(&self) -> String {
-        self.token.literal.clone()
-    }
-}
-
 impl Display for Expression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::Identifier(identifier) => write!(f, "{}", identifier),
-            Self::Integer(integer) => write!(f, "{}", integer),
-            Self::Boolean(boolean) => write!(f, "{}", boolean),
+            Self::IntegerLiteral(integer) => write!(f, "{}", integer),
+            Self::BooleanLiteral(boolean) => write!(f, "{}", boolean),
             Self::Prefix(prefix) => write!(f, "{}", prefix),
             Self::Infix(infix) => write!(f, "{}", infix),
             Self::If(if_expression) => write!(f, "{}", if_expression),
@@ -205,13 +197,13 @@ impl Display for Identifier {
     }
 }
 
-impl Display for Integer {
+impl Display for IntegerLiteral {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.value)
     }
 }
 
-impl Display for Boolean {
+impl Display for BooleanLiteral {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.value)
     }
@@ -234,15 +226,6 @@ impl Display for IfExpression {
         write!(f, "if {} {}", self.condition, self.consequence)?;
         if let Some(alternative) = &self.alternative {
             write!(f, " else {}", alternative)?;
-        }
-        Ok(())
-    }
-}
-
-impl Display for BlockStatement {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        for statement in &self.statements {
-            write!(f, "{}", statement)?;
         }
         Ok(())
     }

@@ -5,7 +5,8 @@ use super::{
 };
 use crate::{
     ast::expressions::{
-        Boolean, Expression, Identifier, IfExpression, InfixExpression, Integer, PrefixExpression,
+        BooleanLiteral, Expression, Identifier, IfExpression, InfixExpression, IntegerLiteral,
+        PrefixExpression,
     },
     token::TokenType,
 };
@@ -90,12 +91,12 @@ impl Parser {
             }
         };
 
-        Ok(Expression::Integer(Integer { token, value }))
+        Ok(Expression::IntegerLiteral(IntegerLiteral { token, value }))
     }
 
     /// Parses a boolean from the input. Expects the current token to be a boolean.
     fn parse_boolean(&mut self) -> Result<Expression, ()> {
-        Ok(Expression::Boolean(Boolean {
+        Ok(Expression::BooleanLiteral(BooleanLiteral {
             token: self.current_token.clone(),
             value: self.cur_token_is(TokenType::True),
         }))

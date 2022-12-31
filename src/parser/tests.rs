@@ -7,9 +7,9 @@ use crate::lexer::Lexer;
 use crate::parser::Parser;
 use std::any::Any;
 
-/// Helper function to test an `Integer` expression.
+/// Helper function to test an `IntegerLiteral` expression.
 fn test_integer(expr: &Expression, value: i64) {
-    if let Expression::Integer(int) = expr {
+    if let Expression::IntegerLiteral(int) = expr {
         assert_eq!(int.value, value);
         assert_eq!(int.token_literal(), value.to_string());
     } else {
@@ -20,9 +20,9 @@ fn test_integer(expr: &Expression, value: i64) {
     }
 }
 
-/// Helper function to test a `Boolean` expression.
+/// Helper function to test a `BooleanLiteral` expression.
 fn test_boolean(expr: &Expression, value: bool) {
-    if let Expression::Boolean(b) = expr {
+    if let Expression::BooleanLiteral(b) = expr {
         assert_eq!(b.value, value);
         assert_eq!(b.token_literal(), value.to_string());
     } else {

@@ -91,6 +91,33 @@ impl Node for ExpressionStatement {
     }
 }
 
+/// The `BlockStatement` struct represents a block statement in the Monkey language. For example, the
+/// block statement `{ x }` is a block statement with the `statements` field containing the
+/// expression statement `x`.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct BlockStatement {
+    /// The `token` field is the token that the block statement represents.
+    pub token: Token,
+
+    /// The `statements` field is the statements of the block statement.
+    pub statements: Vec<Statement>,
+}
+
+impl Node for BlockStatement {
+    fn token_literal(&self) -> String {
+        self.token.literal.clone()
+    }
+}
+
+impl Display for BlockStatement {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        for statement in &self.statements {
+            write!(f, "{}", statement)?;
+        }
+        Ok(())
+    }
+}
+
 impl Display for Statement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
