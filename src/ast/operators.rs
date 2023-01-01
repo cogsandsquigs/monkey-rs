@@ -28,7 +28,7 @@ impl Node for PrefixOperator {
 
 impl Display for PrefixOperator {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.token_literal())
+        write!(f, "{}", self.r#type)
     }
 }
 
@@ -39,6 +39,15 @@ pub enum PrefixOperatorType {
     Bang,
     /// `-` (unary)
     Neg,
+}
+
+impl Display for PrefixOperatorType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Bang => write!(f, "!"),
+            Self::Neg => write!(f, "-"),
+        }
+    }
 }
 
 /// a `InfixOperator` is a token that can be used in an expression. `Operator`s are used to build
@@ -67,7 +76,7 @@ impl Node for InfixOperator {
 
 impl Display for InfixOperator {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.token_literal())
+        write!(f, "{}", self.r#type)
     }
 }
 
@@ -90,4 +99,19 @@ pub enum InfixOperatorType {
     Lt,
     /// `>`
     Gt,
+}
+
+impl Display for InfixOperatorType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Add => write!(f, "+"),
+            Self::Sub => write!(f, "-"),
+            Self::Mul => write!(f, "*"),
+            Self::Div => write!(f, "/"),
+            Self::Eq => write!(f, "=="),
+            Self::NotEq => write!(f, "!="),
+            Self::Lt => write!(f, "<"),
+            Self::Gt => write!(f, ">"),
+        }
+    }
 }
