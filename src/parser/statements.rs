@@ -77,7 +77,9 @@ impl Parser {
         let expression = self.parse_expression(Precedence::Lowest)?;
 
         // Parse the ending semicolon (if it exists).
-        // TODO: Find out why this is necessary.
+        // It is necessary that we do not error here, as this allows for expressions that are not
+        // terminated by a semicolon that allow for the implicit return of values, like in an `if`
+        // statement.
         if self.peek_token_is(TokenType::Semicolon) {
             self.next_token();
         }
