@@ -1,5 +1,6 @@
 use crate::token::TokenType;
 
+/// Precedence is used to determine the order in which operators are evaluated.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Precedence {
     Lowest,
@@ -11,7 +12,7 @@ pub enum Precedence {
     Call,     // myFunction(X)
 }
 
-pub fn precedence_of(token_type: &TokenType) -> Precedence {
+pub fn token_precedence(token_type: &TokenType) -> Precedence {
     match token_type {
         TokenType::Eq => Precedence::Equals,
         TokenType::NotEq => Precedence::Equals,

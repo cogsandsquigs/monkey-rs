@@ -71,7 +71,11 @@ fn test_infix(expr: &Expression, left: &dyn Any, operator: &str, right: &dyn Any
     };
 
     test_literal(infix.left.as_ref(), left);
-    assert_eq!(infix.operator, operator);
+
+    assert_eq!(infix.operator.token_literal(), operator);
+
+    // TODO: Check that the operatortype enum is correct.
+
     test_literal(infix.right.as_ref(), right);
 }
 
@@ -268,7 +272,9 @@ fn test_prefix_expressions() {
             );
         };
 
-        assert_eq!(prefix.operator, operator);
+        assert_eq!(prefix.operator.token_literal(), operator);
+
+        // TODO: Check that the operatortype enum is correct.
 
         test_literal(&prefix.right, value);
 

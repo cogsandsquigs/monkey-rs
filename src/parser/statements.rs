@@ -1,4 +1,4 @@
-use super::{precedence::Precedence, ParseResult, Parser};
+use super::{operators::Precedence, ParseResult, Parser};
 use crate::{
     ast::{
         expressions::Identifier,

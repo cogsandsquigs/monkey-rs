@@ -1,4 +1,8 @@
-use super::{statements::BlockStatement, Node};
+use super::{
+    operators::{InfixOperator, PrefixOperator},
+    statements::BlockStatement,
+    Node,
+};
 use crate::token::Token;
 use std::fmt::Display;
 
@@ -131,7 +135,7 @@ pub struct PrefixExpression {
     pub token: Token,
 
     /// The `operator` field is the operator of the prefix expression.
-    pub operator: String,
+    pub operator: PrefixOperator,
 
     /// The `right` field is the right-hand side of the prefix expression.
     pub right: Box<Expression>,
@@ -155,7 +159,7 @@ pub struct InfixExpression {
     pub left: Box<Expression>,
 
     /// The `operator` field is the operator of the infix expression.
-    pub operator: String,
+    pub operator: InfixOperator,
 
     /// The `right` field is the right-hand side of the infix expression.
     pub right: Box<Expression>,

@@ -1,6 +1,6 @@
 pub mod errors;
 mod expressions;
-mod precedence;
+mod operators;
 mod statements;
 mod tests;
 

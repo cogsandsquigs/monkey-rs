@@ -1,12 +1,15 @@
 use super::{
     errors::Error,
-    precedence::{precedence_of, Precedence},
+    operators::{token_precedence, Precedence},
     ParseResult, Parser,
 };
 use crate::{
-    ast::expressions::{
-        BooleanLiteral, CallExpression, Expression, FunctionLiteral, Identifier, IfExpression,
-        InfixExpression, IntegerLiteral, PrefixExpression,
+    ast::{
+        expressions::{
+            BooleanLiteral, CallExpression, Expression, FunctionLiteral, Identifier, IfExpression,
+            InfixExpression, IntegerLiteral, PrefixExpression,
+        },
+        operators::{InfixOperator, InfixOperatorType, PrefixOperator, PrefixOperatorType},
     },
     token::TokenType,
 };
@@ -101,9 +104,10 @@ impl Parser {
     /// Parses a prefix expression from the input. e.g. `!5` or `-15`. Expects the current token to be a prefix operator.
     fn parse_prefix(&mut self) -> ParseResult<Expression> {
         let token = self.current_token.clone();
-        let operator = token.literal.clone();
 
-        // Advance to the next token so we can parse the right-hand side of the expression.
+        let operator = self.parse_prefix_operator()?;
+
+        // Advance the token pointer.
         self.next_token();
 
         // The precedence here is `Prefix` b/c we're parsing a prefix expression, which binds
@@ -117,10 +121,25 @@ impl Parser {
         }))
     }
 
+    fn parse_prefix_operator(&mut self) -> ParseResult<PrefixOperator> {
+        let token = self.current_token.clone();
+        let operator = token.literal.clone();
+
+        Ok(PrefixOperator {
+            token,
+            r#type: match operator.as_str() {
+                "!" => PrefixOperatorType::Bang,
+                "-" => PrefixOperatorType::Neg,
+                _ => return Err(Error::new(format!("unknown prefix operator {}", operator))),
+            },
+        })
+    }
+
     /// Parses an infix expression from the input. e.g. `5 + 5` or `5 * 5`. Expects the current token to be an infix operator.
     fn parse_infix(&mut self, left: Expression) -> ParseResult<Expression> {
         let token = self.current_token.clone();
-        let operator = token.literal.clone();
+
+        let operator = self.parse_infix_operator()?;
 
         // Get the precedence of our current operator - we pass this into `parse_expression` so
         // that we can parse the right-hand side of the expression with the correct precedence/binding power,
@@ -138,6 +157,27 @@ impl Parser {
             left: Box::new(left),
             right: Box::new(right),
         }))
+    }
+
+    /// Parses an infix operator from the input. Expects the current token to be an infix operator.
+    fn parse_infix_operator(&mut self) -> ParseResult<InfixOperator> {
+        let token = self.current_token.clone();
+        let operator = token.literal.clone();
+
+        Ok(InfixOperator {
+            token,
+            r#type: match operator.as_str() {
+                "+" => InfixOperatorType::Add,
+                "-" => InfixOperatorType::Sub,
+                "*" => InfixOperatorType::Mul,
+                "/" => InfixOperatorType::Div,
+                "<" => InfixOperatorType::Lt,
+                ">" => InfixOperatorType::Gt,
+                "==" => InfixOperatorType::Eq,
+                "!=" => InfixOperatorType::NotEq,
+                _ => return Err(Error::new(format!("unknown infix operator {}", operator))),
+            },
+        })
     }
 
     /// Parses a grouped expression from the input. e.g. `(5 + 5)`. Expects the current token to be a left parenthesis.
@@ -334,12 +374,12 @@ impl Parser {
 impl Parser {
     /// Peeks at the next token's precedence value.
     fn peek_precedence(&self) -> Precedence {
-        precedence_of(&self.peek_token.r#type)
+        token_precedence(&self.peek_token.r#type)
     }
 
     /// Returns the current token's precedence value.
     fn current_precedence(&self) -> Precedence {
-        precedence_of(&self.current_token.r#type)
+        token_precedence(&self.current_token.r#type)
     }
 
     /// Regesters a prefix function for a given token type.

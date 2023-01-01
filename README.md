@@ -12,6 +12,10 @@ Note that this may update slowly - I do things on my own time, at my own pace :p
 
 ## Notable changes
 
+For most (if not all) of the code, I have tried my best to convert things originally represented with strings and the like into `enum`s, as they are safer than the alternative (look [here](https://www.youtube.com/watch?v=7GzQArrek7A) for an explanation why, as well as other ways to make code safe!).
+
+For example, when parsing operators, the original implementation uses strings to represent operators. However, this is very annoying to work with, as you will need to catch any extraneous "operators" that are not actually operators. Using an `enum` not only makes the code easier to work with, but also guarantees that you _cannot_ parse invalid operators _at all_.
+
 One of the most significant changes that I made was the error handling. Specifically, making it more idiomatic in the Rust language. See, in the original implementation, Thorsten Ball chooses to return `nil` if the parsing of an object/structure/thing does not work. However, this can lead to dangerously unsafe code. Initially, I changed the return types to `Result<T, ()>`, as that is at least safe. Unfortunately, that does not lend us to very idiomatic code, as we append errors manually to our parser, which is both tiring and unsafe (as we could miss an error, causing the parser to go haywire down the line).
 
 The solution to this is twofold: Firstly, change the return type to `Result<T, E>`, where `E` is a custom error type that the language currently uses. This means we have to catch every error that does occur, guaranteeing that we have to handle them.
