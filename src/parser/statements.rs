@@ -11,7 +11,6 @@ use crate::{
 
 impl Parser {
     /// The `parse_statement` method parses a single statement from the input.
-    /// TODO: This should return an actual error, not just `()`.
     pub(crate) fn parse_statement(&mut self) -> ParseResult<Statement> {
         match self.current_token.r#type {
             TokenType::Let => Ok(Statement::Let(self.parse_let_statement()?)),
@@ -22,7 +21,6 @@ impl Parser {
 
     /// The `parse_let_statement` method parses a `let` statement from the input. Expects the current
     /// token to be a `TokenType::Let`.
-    /// TODO: This should return an actual error, not just `()`.
     fn parse_let_statement(&mut self) -> ParseResult<LetStatement> {
         let token = self.current_token.clone();
 

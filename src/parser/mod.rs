@@ -17,7 +17,6 @@ use std::collections::HashMap;
 
 /// The `ParseResult` type is a shorthand for a `Result` type that returns a `()` error type. This is
 /// used to simplify the return type of the `parse_*` functions.
-/// TODO: This should probably be replaced with a custom error type.
 type ParseResult<T> = Result<T, Error>;
 
 /// The parser for the Monkey programming language. It takes a `Lexer` and parses it into an AST.

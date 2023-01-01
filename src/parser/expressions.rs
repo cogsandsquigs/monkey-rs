@@ -279,7 +279,6 @@ impl Parser {
 
         // Parse the first parameter.
         let Expression::Identifier(identifier) = self.parse_identifier()? else {
-            // TODO: Error handling.
             return Err(Error::new(
                 "Expected an identifier in function literal parameters",
             ));
@@ -301,7 +300,6 @@ impl Parser {
 
             // Parse the next parameter.
             let Expression::Identifier(identifier) = self.parse_identifier()? else {
-                // TODO: Error handling.
                 return Err(Error::new(
                     "Expected an identifier in function literal parameters",
                 ));
