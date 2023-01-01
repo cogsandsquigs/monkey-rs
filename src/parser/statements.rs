@@ -39,10 +39,11 @@ impl Parser {
 
         let value = self.parse_expression(Precedence::Lowest)?;
 
-        // TODO: We're skipping expressions until we get to the semicolon.
-        while !self.cur_token_is(TokenType::Semicolon) {
-            self.next_token();
-        }
+        // Expect a semicolon at the end of the statement.
+        self.expect_peek(TokenType::Semicolon)?;
+
+        // We do not advance here, as in the main `parse_program` method, we advance after parsing
+        // a statement, skipping over the semicolon.
 
         Ok(LetStatement {
             token,
