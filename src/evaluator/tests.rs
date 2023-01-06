@@ -24,6 +24,14 @@ fn test_integer_object(obj: Option<Object>, value: i64) {
     }
 }
 
+/// Tests a boolean object
+fn test_boolean_object(obj: Option<Object>, value: bool) {
+    match obj {
+        Some(Object::Boolean(boolean)) => assert_eq!(boolean.value, value),
+        _ => panic!("Object is not a Boolean, found {:?}", obj),
+    }
+}
+
 /// Tests the evaluation of an integer expression
 #[test]
 fn test_eval_integer_expression() {
@@ -34,5 +42,18 @@ fn test_eval_integer_expression() {
         let obj = eval(Nodes::Program(program));
 
         test_integer_object(obj, expected);
+    }
+}
+
+/// Tests the evaluation of a boolean expression
+#[test]
+fn test_eval_boolean_expression() {
+    let tests = vec![("true", true), ("false", false)];
+
+    for (input, expected) in tests {
+        let program = parse(input);
+        let obj = eval(Nodes::Program(program));
+
+        test_boolean_object(obj, expected);
     }
 }
