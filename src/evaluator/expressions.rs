@@ -33,7 +33,7 @@ fn eval_prefix(operator: PrefixOperatorType, right: Object) -> Option<Object> {
     match operator {
         PrefixOperatorType::Bang => eval_op_bang(right),
 
-        _ => todo!(),
+        PrefixOperatorType::Neg => eval_op_neg(right),
     }
 }
 
@@ -46,5 +46,15 @@ fn eval_op_bang(right: Object) -> Option<Object> {
         Object::Null(Null) => Some(Object::Boolean(Boolean::new(true))),
 
         _ => Some(Object::Boolean(Boolean::new(false))),
+    }
+}
+
+/// Evaluates the `-` operator. This operator converts the `right` object to an `Integer` and negates
+/// its value.
+fn eval_op_neg(right: Object) -> Option<Object> {
+    match right {
+        Object::Integer(Integer { value }) => Some(Object::Integer(Integer::new(-value))),
+
+        _ => None,
     }
 }
