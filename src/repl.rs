@@ -1,4 +1,4 @@
-use crate::{lexer::Lexer, parser::Parser};
+use crate::{ast::Nodes, evaluator::eval, lexer::Lexer, parser::Parser};
 use std::io::{BufRead, BufReader, Read, Result, Write};
 
 const PROMPT: &str = ">> ";
@@ -33,21 +33,22 @@ pub fn start<I: Read, O: Write>(inp: I, mut out: O) -> Result<()> {
         let lexer = Lexer::new(&line);
         let mut parser = Parser::new(lexer);
 
-        loop {
-            let parsed = parser.parse_program();
+        let parsed = parser.parse_program();
 
-            match parsed {
-                Ok(program) => {
-                    writeln!(out, "{}", program)?;
-                    break;
+        match parsed {
+            Ok(program) => {
+                let evaluated = eval(Nodes::Program(program));
+
+                if let Some(object) = evaluated {
+                    writeln!(out, "{}", object)?;
                 }
-                Err(errors) => {
-                    writeln!(out, "{}", MONKEY_FACE)?;
-                    writeln!(out, "Woops! We ran into some monkey business here!")?;
-                    writeln!(out, " parser errors:")?;
-                    for error in errors {
-                        writeln!(out, "\t{}", error)?;
-                    }
+            }
+            Err(errors) => {
+                writeln!(out, "{}", MONKEY_FACE)?;
+                writeln!(out, "Woops! We ran into some monkey business here!")?;
+                writeln!(out, " parser errors:")?;
+                for error in errors {
+                    writeln!(out, "\t{}", error)?;
                 }
             }
         }

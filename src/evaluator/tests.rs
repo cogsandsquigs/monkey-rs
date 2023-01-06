@@ -1,11 +1,13 @@
 #![cfg(test)]
 
 use crate::{
-    ast::Program,
+    ast::{Nodes, Program},
     lexer::Lexer,
-    object::{Object, Objective},
+    object::Object,
     parser::Parser,
 };
+
+use super::eval;
 
 /// Parses the input source code
 fn parse(input: &str) -> Program {
@@ -15,10 +17,10 @@ fn parse(input: &str) -> Program {
 }
 
 /// Tests an integer object
-fn test_integer_object(obj: Object, value: i64) {
+fn test_integer_object(obj: Option<Object>, value: i64) {
     match obj {
-        Object::Integer(integer) => assert_eq!(integer.value, value),
-        _ => panic!("Object is not an Integer, found {:?}", obj.object_type()),
+        Some(Object::Integer(integer)) => assert_eq!(integer.value, value),
+        _ => panic!("Object is not an Integer, found {:?}", obj),
     }
 }
 
@@ -29,7 +31,7 @@ fn test_eval_integer_expression() {
 
     for (input, expected) in tests {
         let program = parse(input);
-        let obj = eval(program);
+        let obj = eval(Nodes::Program(program));
 
         test_integer_object(obj, expected);
     }

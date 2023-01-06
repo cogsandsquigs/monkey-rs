@@ -3,7 +3,7 @@ pub mod operators;
 pub mod statements;
 mod tests;
 
-use self::statements::Statement;
+use self::{expressions::Expression, statements::Statement};
 use core::fmt::Debug;
 use std::fmt::Display;
 
@@ -15,7 +15,7 @@ pub trait Node: Debug + Display {
 }
 
 /// The `Program` struct represents the root node of the AST. It contains a list of statements.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Program {
     /// A collection of statements that are contained in the program.
     pub statements: Vec<Statement>,
@@ -40,4 +40,12 @@ impl Display for Program {
 
         Ok(())
     }
+}
+
+/// The `Nodes` enum is used to represent any type of `Node` in the AST.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum Nodes {
+    Program(Program),
+    Statement(Statement),
+    Expression(Expression),
 }
