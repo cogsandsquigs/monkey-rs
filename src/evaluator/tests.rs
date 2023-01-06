@@ -1,11 +1,6 @@
 #![cfg(test)]
 
-use crate::{
-    ast::{Nodes, Program},
-    lexer::Lexer,
-    object::Object,
-    parser::Parser,
-};
+use crate::{ast::Program, lexer::Lexer, object::Object, parser::Parser};
 
 use super::eval;
 
@@ -39,7 +34,7 @@ fn test_eval_integer_expression() {
 
     for (input, expected) in tests {
         let program = parse(input);
-        let obj = eval(Nodes::Program(program));
+        let obj = eval(program);
 
         test_integer_object(obj, expected);
     }
@@ -52,7 +47,27 @@ fn test_eval_boolean_expression() {
 
     for (input, expected) in tests {
         let program = parse(input);
-        let obj = eval(Nodes::Program(program));
+        let obj = eval(program);
+
+        test_boolean_object(obj, expected);
+    }
+}
+
+/// Tests the evaluation of boolean prefix expressions
+#[test]
+fn test_eval_boolean_prefix() {
+    let tests = vec![
+        ("!true", false),
+        ("!false", true),
+        ("!5", false),
+        ("!!true", true),
+        ("!!false", false),
+        ("!!5", true),
+    ];
+
+    for (input, expected) in tests {
+        let program = parse(input);
+        let obj = eval(program);
 
         test_boolean_object(obj, expected);
     }

@@ -1,4 +1,4 @@
-use crate::{ast::Nodes, evaluator::eval, lexer::Lexer, parser::Parser};
+use crate::{evaluator::eval, lexer::Lexer, parser::Parser};
 use std::io::{BufRead, BufReader, Read, Result, Write};
 
 const PROMPT: &str = ">> ";
@@ -37,7 +37,7 @@ pub fn start<I: Read, O: Write>(inp: I, mut out: O) -> Result<()> {
 
         match parsed {
             Ok(program) => {
-                let evaluated = eval(Nodes::Program(program));
+                let evaluated = eval(program);
 
                 if let Some(object) = evaluated {
                     writeln!(out, "{}", object)?;
