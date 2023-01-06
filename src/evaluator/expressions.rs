@@ -55,6 +55,6 @@ fn eval_op_neg(right: Object) -> Option<Object> {
     match right {
         Object::Integer(Integer { value }) => Some(Object::Integer(Integer::new(-value))),
 
-        _ => None,
+        _ => Some(Object::Null(Null)),
     }
 }
