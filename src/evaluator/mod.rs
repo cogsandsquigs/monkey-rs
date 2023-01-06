@@ -2,22 +2,26 @@ pub mod tests;
 
 use crate::{
     ast::{expressions::Expression, statements::Statement, Nodes},
-    object::{integer::Integer, Object},
+    object::{boolean::Boolean, integer::Integer, Object},
 };
 
 pub fn eval(node: Nodes) -> Option<Object> {
     match node {
+        // Statements
         Nodes::Program(program) => eval_statements(program.statements),
 
         Nodes::Statement(statement) => match statement {
             Statement::Expression(expression) => eval(Nodes::Expression(expression.expression)),
+
             _ => todo!(),
         },
 
+        // Expressions
         Nodes::Expression(expression) => match expression {
-            Expression::Integer(integer) => Some(Object::Integer(Integer {
-                value: integer.value,
-            })),
+            Expression::Integer(integer) => Some(Object::Integer(Integer::new(integer.value))),
+
+            Expression::Boolean(boolean) => Some(Object::Boolean(Boolean::new(boolean.value))),
+
             _ => todo!(),
         },
     }

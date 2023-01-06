@@ -7,6 +7,13 @@ pub struct Boolean {
     pub value: bool,
 }
 
+impl Boolean {
+    /// Creates a new Boolean object.
+    pub fn new(value: bool) -> Self {
+        Self { value }
+    }
+}
+
 impl Objective for Boolean {
     fn object_type(&self) -> ObjectType {
         ObjectType::Boolean

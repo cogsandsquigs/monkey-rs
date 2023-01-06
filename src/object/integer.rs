@@ -7,6 +7,13 @@ pub struct Integer {
     pub value: i64,
 }
 
+impl Integer {
+    /// Creates a new Integer object.
+    pub fn new(value: i64) -> Self {
+        Self { value }
+    }
+}
+
 impl Objective for Integer {
     fn object_type(&self) -> ObjectType {
         ObjectType::Integer

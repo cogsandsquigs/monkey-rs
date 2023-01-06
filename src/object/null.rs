@@ -2,8 +2,15 @@ use super::{ObjectType, Objective};
 use std::fmt::Display;
 
 /// The Null object.
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Default, Copy, Clone, PartialEq, Eq)]
 pub struct Null;
+
+impl Null {
+    /// Creates a new Null object.
+    pub fn new() -> Self {
+        Self
+    }
+}
 
 impl Objective for Null {
     fn object_type(&self) -> ObjectType {
